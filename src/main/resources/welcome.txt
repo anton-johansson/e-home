@@ -1,0 +1,14 @@
+
+[36m   _______         __   __  _______  __   __  _______     [0m
+[36m  |       |       |  | |  ||       ||  |_|  ||       |    [0m
+[36m  |    ___| ____  |  |_|  ||   _   ||       ||    ___|    [0m
+[36m  |   |___ |____| |       ||  | |  ||       ||   |___     [0m
+[36m  |    ___|       |       ||  |_|  ||       ||    ___|    [0m
+[36m  |   |___        |   _   ||       || ||_|| ||   |___     [0m
+[36m  |_______|       |__| |__||_______||_|   |_||_______|    [0m
+
+[1m     E-Home [0m(0.0.1-SNAPSHOT) by [1mAnton Johansson[0m
+
+Welcome [33m[1m${user}[0m!
+Hit '[1m<tab>[0m' to show available commands.
+Hit '[1m<ctrl-d>[0m' or type '[1mdisconnect[0m' to close the connection.
