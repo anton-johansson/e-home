@@ -13,6 +13,7 @@ An E-Home controller server.
 docker run \
     --detach \
     --name influxdb \
+    --restart always \
     --publish 8086:8086 \
     --volume /home/anton/influxdb-data:/var/lib/influxdb \
     influxdb:1.4.2
