@@ -15,9 +15,43 @@
  */
 package com.anton.ehome.conf;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+
 /**
  * Holds configuration for the application.
  */
 public class Config
 {
+    private int test;
+
+    public int getTest()
+    {
+        return test;
+    }
+
+    public void setTest(int test)
+    {
+        this.test = test;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object that)
+    {
+        return reflectionEquals(this, that);
+    }
+
+    @Override
+    public String toString()
+    {
+        return reflectionToString(this, SHORT_PREFIX_STYLE);
+    }
 }

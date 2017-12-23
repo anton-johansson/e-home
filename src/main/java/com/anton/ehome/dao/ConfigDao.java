@@ -15,7 +15,13 @@
  */
 package com.anton.ehome.dao;
 
+import static com.anton.ehome.json.JsonUtils.JSON_MAPPER;
+
+import java.time.Instant;
+
 import org.influxdb.InfluxDB;
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
 
 import com.anton.ehome.conf.Config;
 
@@ -24,14 +30,37 @@ import com.anton.ehome.conf.Config;
  */
 class ConfigDao extends AbstractDao implements IConfigDao
 {
-    ConfigDao(InfluxDB database)
+    ConfigDao(InfluxDB influx)
     {
-        super(database);
+        super(influx);
     }
 
     @Override
     public Config getCurrentConfig()
     {
-        return new Config();
+        ConfigData config = selectOne("SELECT data FROM config ORDER BY DESC LIMIT 1", ConfigData.class)
+                .orElseGet(() -> createDefaultConfig());
+
+        return JSON_MAPPER.fromJson(config.data, Config.class);
+    }
+
+    private ConfigData createDefaultConfig()
+    {
+        ConfigData config = new ConfigData();
+        config.data = JSON_MAPPER.toJson(new Config());
+        insert().measurement("config")
+                .field("data", config.data)
+                .execute();
+        return config;
+    }
+
+    /**
+     * Defines a configuration stored in the database.
+     */
+    @Measurement(name = "config")
+    public static class ConfigData
+    {
+        private @Column(name = "time") Instant time;
+        private @Column(name = "data") String data;
     }
 }
