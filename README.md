@@ -3,7 +3,7 @@
 An E-Home controller server.
 
 
-Prerequisites
+## Prerequisites
 
  * The application requires the RXTX native library to run. This can be installed on a Debian-based system using `sudo apt install librxtx-java`.
 
