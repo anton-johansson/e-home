@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome;
+package com.anton.ehome.ssh;
 
 import static java.util.Arrays.asList;
 

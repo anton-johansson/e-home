@@ -15,39 +15,37 @@
  */
 package com.anton.ehome;
 
-import static java.util.Arrays.asList;
-
-import java.io.IOException;
 import java.util.Scanner;
 
-import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.UserAuthNoneFactory;
-import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.anton.ehome.conf.Config;
 
 /**
  * Contains the applications main entry-point.
  */
 public class EntryPoint
 {
-    private static final int DEFAULT_PORT = 8022;
+    private static final Logger LOG = LoggerFactory.getLogger(EntryPoint.class);
 
     /**
      * The main entry-point.
      */
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args)
     {
-        SshServer ssh = SshServer.setUpDefaultServer();
-        ssh.setPort(DEFAULT_PORT);
-        ssh.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
-        ssh.setUserAuthFactories(asList(new UserAuthNoneFactory()));
-        ssh.setShellFactory(() -> new EHomeShell());
-        ssh.start();
+        Config config = new Config();
 
-        System.out.println("Started!");
+        Daemon daemon = new Daemon(config);
+        daemon.start();
+
+        LOG.info("Press [Enter] to stop the daemons");
         try (Scanner scanner = new Scanner(System.in))
         {
             scanner.nextLine();
         }
-        ssh.stop();
+        daemon.stop();
+
+        LOG.info("Exiting...");
     }
 }

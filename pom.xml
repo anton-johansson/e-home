@@ -181,6 +181,7 @@
                         <exclude>NOTICE</exclude>
                         <exclude>.checkstyle</exclude>
                         <exclude>src/main/resources/welcome.txt</exclude>
+                        <exclude>launchers/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
