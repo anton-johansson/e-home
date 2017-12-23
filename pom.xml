@@ -71,6 +71,7 @@
         <!-- Dependency versions -->
         <commons-lang3.version>3.7</commons-lang3.version>
         <commons-io.version>2.6</commons-io.version>
+        <influxdb.version>2.8</influxdb.version>
         <junit.version>4.12</junit.version>
         <sshd.version>1.6.0</sshd.version>
         <wzwave.version>0.0.4-SNAPSHOT</wzwave.version>
@@ -160,11 +161,17 @@
             <scope>system</scope>
         </dependency>
         <dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <version>${influxdb.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
     <build>
