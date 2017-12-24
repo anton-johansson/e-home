@@ -15,21 +15,28 @@
  */
 package com.anton.ehome.dao;
 
-import static com.anton.ehome.json.JsonUtils.JSON_MAPPER;
+import static com.anton.ehome.utils.JsonUtils.JSON_MAPPER;
+import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBException;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
 import com.anton.ehome.conf.Config;
+import com.google.inject.Inject;
 
 /**
  * {@link InfluxDB} implementation of {@link IConfigDao}.
  */
 class ConfigDao extends AbstractDao implements IConfigDao
 {
+    private static final String CURRENT_CONFIG_QUERY = "SELECT sha, data FROM config ORDER BY DESC LIMIT 1";
+
+    @Inject
     ConfigDao(InfluxDB influx)
     {
         super(influx);
@@ -38,20 +45,39 @@ class ConfigDao extends AbstractDao implements IConfigDao
     @Override
     public Config getCurrentConfig()
     {
-        ConfigData config = selectOne("SELECT data FROM config ORDER BY DESC LIMIT 1", ConfigData.class)
-                .orElseGet(() -> createDefaultConfig());
-
-        return JSON_MAPPER.fromJson(config.data, Config.class);
+        ConfigData result = getOrCreateCurrentConfig();
+        Config config = JSON_MAPPER.fromJson(result.data, Config.class);
+        config.setIdentifier(result.sha);
+        return config;
     }
 
-    private ConfigData createDefaultConfig()
+    private ConfigData getOrCreateCurrentConfig()
     {
-        ConfigData config = new ConfigData();
-        config.data = JSON_MAPPER.toJson(new Config());
+        Optional<ConfigData> result = selectOne(CURRENT_CONFIG_QUERY, ConfigData.class);
+        if (result.isPresent())
+        {
+            return result.get();
+        }
+        else
+        {
+            createDefaultConfig();
+            return selectOne(CURRENT_CONFIG_QUERY, ConfigData.class).orElseThrow(() -> new InfluxDBException("Could not create or find default configuration"));
+        }
+    }
+
+    private void createDefaultConfig()
+    {
+        String data = JSON_MAPPER.toJson(new Config());
         insert().measurement("config")
-                .field("data", config.data)
+                .field("sha", time -> generateSha(time, data), true)
+                .field("data", data)
                 .execute();
-        return config;
+    }
+
+    private String generateSha(long time, String data)
+    {
+        String value = time + ":" + data;
+        return sha1Hex(value);
     }
 
     /**
@@ -61,6 +87,7 @@ class ConfigDao extends AbstractDao implements IConfigDao
     public static class ConfigData
     {
         private @Column(name = "time") Instant time;
+        private @Column(name = "sha") String sha;
         private @Column(name = "data") String data;
     }
 }

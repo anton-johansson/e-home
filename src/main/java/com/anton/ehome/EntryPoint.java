@@ -15,12 +15,20 @@
  */
 package com.anton.ehome;
 
+import static java.util.Arrays.asList;
+
+import java.util.List;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.conf.Config;
+import com.anton.ehome.conf.ConfigModule;
+import com.anton.ehome.dao.DaoModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 
 /**
  * Contains the applications main entry-point.
@@ -34,7 +42,12 @@ public class EntryPoint
      */
     public static void main(String[] args)
     {
-        Config config = new Config();
+        LOG.debug("Creating Guice injector");
+        List<Module> modules = getModules();
+        modules.forEach(module -> LOG.debug("Using module: {}", module.getClass().getName()));
+        Injector injector = Guice.createInjector(modules);
+
+        Config config = injector.getInstance(Config.class);
 
         Daemon daemon = new Daemon(config);
         daemon.start();
@@ -47,5 +60,12 @@ public class EntryPoint
         daemon.stop();
 
         LOG.info("Exiting...");
+    }
+
+    private static List<Module> getModules()
+    {
+        return asList(
+                new ConfigModule(),
+                new DaoModule());
     }
 }

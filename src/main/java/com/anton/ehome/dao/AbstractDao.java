@@ -18,8 +18,11 @@ package com.anton.ehome.dao;
 import static com.anton.ehome.dao.InfluxUtils.DATABASE_NAME;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBException;
@@ -109,13 +112,16 @@ abstract class AbstractDao
      */
     protected class InsertMeasurementBuilder
     {
+        private final Set<String> fields = new HashSet<>();
         private final String measurement;
+        private final long time;
         private final Builder builder;
 
         private InsertMeasurementBuilder(String measurement)
         {
             this.measurement = measurement;
-            builder = Point.measurement(measurement).time(System.currentTimeMillis(), MILLISECONDS);
+            this.time = System.currentTimeMillis();
+            builder = Point.measurement(measurement).time(time, MILLISECONDS);
         }
 
         /**
@@ -127,8 +133,44 @@ abstract class AbstractDao
          */
         protected InsertMeasurementBuilder field(String field, String value)
         {
+            return field(field, value, false);
+        }
+
+        /**
+         * Adds a {@link String}-value field.
+         *
+         * @param field The name of the field.
+         * @param value The value of the field.
+         * @param indexed Whether or not this field should be indexed.
+         * @return Returns the builder.
+         */
+        protected InsertMeasurementBuilder field(String field, String value, boolean indexed)
+        {
+            if (!fields.add(field))
+            {
+                throw new IllegalArgumentException("The field '" + field + "' is already added");
+            }
+
+            if (indexed)
+            {
+                builder.tag(field, value);
+            }
             builder.addField(field, value);
             return this;
+        }
+
+        /**
+         * Adds a {@link String}-value field, using a function that accepts the time of insertion.
+         *
+         * @param field The name of the field.
+         * @param function The function that supplies the value, using the time field.
+         * @param indexed Whether or not this field should be indexed.
+         * @return Returns the builder.
+         */
+        protected InsertMeasurementBuilder field(String field, Function<Long, String> function, boolean indexed)
+        {
+            String value = function.apply(time);
+            return field(field, value, indexed);
         }
 
         /**

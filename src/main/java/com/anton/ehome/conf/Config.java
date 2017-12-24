@@ -25,7 +25,18 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
  */
 public class Config
 {
+    private String identifier = "";
     private int test;
+
+    public String getIdentifier()
+    {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier)
+    {
+        this.identifier = identifier;
+    }
 
     public int getTest()
     {
