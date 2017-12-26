@@ -19,7 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.conf.Config;
-import com.anton.ehome.ssh.SshDaemon;
+import com.anton.ehome.ssh.IDaemon;
+import com.google.inject.Inject;
 
 /**
  * Defines the daemon running all necessary software.
@@ -29,11 +30,13 @@ class Daemon
     private static final Logger LOG = LoggerFactory.getLogger(Daemon.class);
 
     private final Config config;
-    private SshDaemon ssh;
+    private final IDaemon ssh;
 
-    Daemon(Config config)
+    @Inject
+    Daemon(Config config, IDaemon ssh)
     {
         this.config = config;
+        this.ssh = ssh;
     }
 
     /**
@@ -42,7 +45,6 @@ class Daemon
     void start()
     {
         LOG.info("Starting daemons...");
-        ssh = new SshDaemon();
         if (ssh.start())
         {
             LOG.info("Daemons successfully started!");
@@ -59,10 +61,7 @@ class Daemon
     void stop()
     {
         LOG.info("Stopping daemons...");
-
         ssh.stop();
-        ssh = null;
-
         LOG.info("Daemons successfully stopped");
     }
 }

@@ -19,34 +19,46 @@ import static java.util.Arrays.asList;
 
 import java.io.IOException;
 
+import org.apache.sshd.server.Command;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuthNoneFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 /**
  * Hosts the SSH server.
  */
-public class SshDaemon
+class SshDaemon implements IDaemon
 {
     private static final Logger LOG = LoggerFactory.getLogger(SshDaemon.class);
     private static final int DEFAULT_PORT = 8022;
 
+    private final Provider<Command> shellFactory;
     private SshServer server;
+
+    @Inject
+    SshDaemon(Provider<Command> shellFactory)
+    {
+        this.shellFactory = shellFactory;
+    }
 
     /**
      * Starts the SSH daemon.
      *
      * @return Returns whether or not this daemon successfully started.
      */
+    @Override
     public boolean start()
     {
         server = SshServer.setUpDefaultServer();
         server.setPort(DEFAULT_PORT);
         server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
         server.setUserAuthFactories(asList(new UserAuthNoneFactory()));
-        server.setShellFactory(() -> new EHomeShell());
+        server.setShellFactory(shellFactory::get);
 
         try
         {
@@ -63,6 +75,7 @@ public class SshDaemon
     /**
      * Stops the SSH daemon.
      */
+    @Override
     public void stop()
     {
         if (server != null)

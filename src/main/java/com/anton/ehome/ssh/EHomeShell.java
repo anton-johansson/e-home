@@ -30,6 +30,8 @@ import org.apache.sshd.server.ExitCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+
 /**
  * Provides the SSH shell for the E-Home server.
  */
@@ -66,10 +68,11 @@ class EHomeShell implements Command
     private int cursorLocation;
     private boolean lastCommandSuccess = true;
 
-    EHomeShell()
+    @Inject
+    EHomeShell(WelcomeTextProvider welcomeTextProvider)
     {
-        thread = new Thread(this::thread, "ssh-thread");
-        welcomeTextProvider = new WelcomeTextProvider();
+        this.welcomeTextProvider = welcomeTextProvider;
+        this.thread = new Thread(this::thread, "ssh-thread");
     }
 
     @Override
