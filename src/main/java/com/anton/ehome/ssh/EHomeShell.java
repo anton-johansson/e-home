@@ -16,13 +16,18 @@
 package com.anton.ehome.ssh;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.StringTokenizer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.common.SshException;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
@@ -30,6 +35,7 @@ import org.apache.sshd.server.ExitCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.ssh.cmd.ICommand;
 import com.google.inject.Inject;
 
 /**
@@ -40,6 +46,7 @@ class EHomeShell implements Command
     private static final Logger LOG = LoggerFactory.getLogger(EHomeShell.class);
     private static final int END_OF_TEXT = 3;
     private static final int END_OF_TRANSMISSION = 4;
+    private static final int TAB = 9;
     private static final int LINE_FEED = 10;
     private static final int CARRIAGE_RETURN = 13;
     private static final int ESCAPE = 27;
@@ -47,18 +54,19 @@ class EHomeShell implements Command
 
     // CSOFF
     private static final List<Integer> ECHO_BYTES = asList(
-             32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47, // Space!"#$%&'()*+,-./
-             58,  59,  60,  61,  62,  63,  64,  91,  92,  93,  94,  95,  96, 123, 124, 125, 126, // :;<=>?@[\]^_`{|}~
-             48,  49,  50,  51,  52,  53,  54,  55,  56,  57, // 0-9
-             65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90, // A-Z
-             97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122 // a-z
+            32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, // Space!"#$%&'()*+,-./
+            58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96, 123, 124, 125, 126, // :;<=>?@[\]^_`{|}~
+            48, 49, 50, 51, 52, 53, 54, 55, 56, 57, // 0-9
+            65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, // A-Z
+            97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122 // a-z
     );
     // CSON
 
     private static final List<Character> ANSI_ESCAPE_ENDINGS = asList('A', 'B', 'C', 'D', 'm', '\u001B');
 
-    private final Thread thread;
     private final WelcomeTextProvider welcomeTextProvider;
+    private final Map<String, ICommand> commands;
+    private final Thread thread;
     private InputStream input;
     private OutputStream output;
     private ExitCallback exitCallback;
@@ -69,9 +77,10 @@ class EHomeShell implements Command
     private boolean lastCommandSuccess = true;
 
     @Inject
-    EHomeShell(WelcomeTextProvider welcomeTextProvider)
+    EHomeShell(WelcomeTextProvider welcomeTextProvider, Map<String, ICommand> commands)
     {
         this.welcomeTextProvider = welcomeTextProvider;
+        this.commands = commands;
         this.thread = new Thread(this::thread, "ssh-thread");
     }
 
@@ -173,6 +182,21 @@ class EHomeShell implements Command
                         logCurrentCommand();
                     }
                 }
+                else if (character == TAB)
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(currentInput.toString());
+                    int tokens = tokenizer.countTokens();
+                    if (tokens == 1)
+                    {
+                        autocompleteFirst();
+                    }
+                    else if (tokens > 1)
+                    {
+                        String command = tokenizer.nextToken();
+                        String data = StringUtils.substringAfter(currentInput.toString(), command);
+                        Optional.ofNullable(commands.get(command)).ifPresent(implementation -> autocompleteCommand(implementation, data));
+                    }
+                }
             }
         }
         catch (SshException | InterruptedIOException e)
@@ -183,6 +207,33 @@ class EHomeShell implements Command
         {
             throw new RuntimeException(e);
         }
+    }
+
+    private void autocompleteFirst() throws IOException
+    {
+        String input = currentInput.toString().trim();
+        List<String> matchingCommands = commands.keySet()
+                .stream()
+                .filter(key -> key.startsWith(input))
+                .collect(toList());
+
+        if (matchingCommands.size() == 1)
+        {
+            String command = matchingCommands.get(0);
+            if (input.length() < command.length())
+            {
+                String missing = command.substring(input.length());
+                currentInput.append(missing);
+                cursorLocation += missing.length();
+                send(missing);
+                logCurrentCommand();
+            }
+        }
+    }
+
+    private void autocompleteCommand(ICommand command, String data)
+    {
+        LOG.warn("Autocompleting commands aren't implemented ({} with data: {}", command.getClass().getSimpleName(), data);
     }
 
     private void handleAnsiEscapeSequence(String escapeSequence) throws IOException

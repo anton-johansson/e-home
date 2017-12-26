@@ -13,26 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh;
-
-import org.apache.sshd.server.Command;
-
-import com.anton.ehome.ssh.cmd.CommandModule;
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+package com.anton.ehome.ssh.cmd;
 
 /**
- * Contains IOC bindings for the SSH module.
+ * Defines an executable command.
  */
-public class SshModule extends AbstractModule
+public interface ICommand
 {
-    @Override
-    protected void configure()
-    {
-        bind(IDaemon.class).to(SshDaemon.class).in(Singleton.class);
-        bind(WelcomeTextProvider.class).in(Singleton.class);
-        bind(Command.class).to(EHomeShell.class);
-
-        install(new CommandModule());
-    }
 }

@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh;
+package com.anton.ehome.ssh.cmd;
 
-import org.apache.sshd.server.Command;
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
 
-import com.anton.ehome.ssh.cmd.CommandModule;
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+import com.google.inject.multibindings.MapBinder;
 
 /**
- * Contains IOC bindings for the SSH module.
+ * Contains IOC bindings for the SSH commands.
  */
-public class SshModule extends AbstractModule
+public class CommandModule extends AbstractModule
 {
     @Override
     protected void configure()
     {
-        bind(IDaemon.class).to(SshDaemon.class).in(Singleton.class);
-        bind(WelcomeTextProvider.class).in(Singleton.class);
-        bind(Command.class).to(EHomeShell.class);
+        commands().addBinding("disconnect").to(DisconnectCommand.class);
+    }
 
-        install(new CommandModule());
+    private MapBinder<String, ICommand> commands()
+    {
+        return newMapBinder(binder(), String.class, ICommand.class);
     }
 }
