@@ -187,6 +187,7 @@ class EHomeShell implements Command
 
     private void handleAnsiEscapeSequence(String escapeSequence) throws IOException
     {
+        // RIGHT
         if ("\u001B[C".equals(escapeSequence))
         {
             if (cursorLocation < currentInput.length())
@@ -196,6 +197,8 @@ class EHomeShell implements Command
                 logCurrentCommand();
             }
         }
+
+        // LEFT
         else if ("\u001B[D".equals(escapeSequence))
         {
             if (cursorLocation > 0)
@@ -205,6 +208,8 @@ class EHomeShell implements Command
                 logCurrentCommand();
             }
         }
+
+        // CTRL + RIGHT
         else if ("\u001B[1;5C".equals(escapeSequence))
         {
             if (cursorLocation < currentInput.length())
@@ -216,6 +221,8 @@ class EHomeShell implements Command
                 logCurrentCommand();
             }
         }
+
+        // CTRL + LEFT
         else if ("\u001B[1;5D".equals(escapeSequence))
         {
             if (cursorLocation > 0)
@@ -224,6 +231,32 @@ class EHomeShell implements Command
                 int diff = cursorLocation - newCursorLocation;
                 cursorLocation = newCursorLocation;
                 send("\u001B[" + diff + "D");
+                logCurrentCommand();
+            }
+        }
+
+        // HOME
+        else if ("\u001B[H".equals(escapeSequence))
+        {
+            if (cursorLocation > 0)
+            {
+                int newCursorLocation = 0;
+                int diff = cursorLocation - newCursorLocation;
+                cursorLocation = newCursorLocation;
+                send("\u001B[" + diff + "D");
+                logCurrentCommand();
+            }
+        }
+
+        // END
+        else if ("\u001B[F".equals(escapeSequence))
+        {
+            int newCursorLocation = currentInput.length();
+            if (cursorLocation < newCursorLocation)
+            {
+                int diff = newCursorLocation - cursorLocation;
+                cursorLocation = newCursorLocation;
+                send("\u001B[" + diff + "C");
                 logCurrentCommand();
             }
         }
