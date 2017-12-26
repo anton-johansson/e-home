@@ -51,8 +51,6 @@ class EHomeShell implements Command
     private static final int CARRIAGE_RETURN = 13;
     private static final int ESCAPE = 27;
     private static final int BACKSPACE = 127;
-
-    // CSOFF
     private static final List<Integer> ECHO_BYTES = asList(
             32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, // Space!"#$%&'()*+,-./
             58, 59, 60, 61, 62, 63, 64, 91, 92, 93, 94, 95, 96, 123, 124, 125, 126, // :;<=>?@[\]^_`{|}~
@@ -60,7 +58,6 @@ class EHomeShell implements Command
             65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, // A-Z
             97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122 // a-z
     );
-    // CSON
 
     private static final List<Character> ANSI_ESCAPE_ENDINGS = asList('A', 'B', 'C', 'D', 'm', '\u001B');
 
@@ -308,6 +305,18 @@ class EHomeShell implements Command
                 int diff = newCursorLocation - cursorLocation;
                 cursorLocation = newCursorLocation;
                 send("\u001B[" + diff + "C");
+                logCurrentCommand();
+            }
+        }
+
+        // DEL
+        else if ("\u001B[3~".equals(escapeSequence))
+        {
+            if (cursorLocation < currentInput.length())
+            {
+                String valueAfter = currentInput.toString().substring(cursorLocation + 1) + " ";
+                currentInput.deleteCharAt(cursorLocation);
+                send(valueAfter + "\u001B[" + valueAfter.length() + "D");
                 logCurrentCommand();
             }
         }
