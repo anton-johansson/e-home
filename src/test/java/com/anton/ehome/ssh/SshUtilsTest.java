@@ -18,8 +18,6 @@ package com.anton.ehome.ssh;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.anton.ehome.ssh.SshUtils;
-
 /**
  * Unit tests of {@link SshUtils}.
  */
