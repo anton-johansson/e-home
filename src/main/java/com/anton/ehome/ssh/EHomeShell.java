@@ -116,7 +116,7 @@ class EHomeShell implements Command
                         value = value + afterCursor + "\u001B[" + afterCursor.length() + "D";
                     }
                     send(value);
-                    logCurrentCommand(currentInput, cursorLocation);
+                    logCurrentCommand();
                 }
                 else if (character == ESCAPE)
                 {
@@ -139,7 +139,7 @@ class EHomeShell implements Command
                     cursorLocation = 0;
                     send("\r\n\r\n");
                     displayPrompt();
-                    logCurrentCommand(currentInput, cursorLocation);
+                    logCurrentCommand();
                 }
                 else if (character == END_OF_TRANSMISSION)
                 {
@@ -153,7 +153,7 @@ class EHomeShell implements Command
                     displayPrompt();
                     currentInput.setLength(0);
                     cursorLocation = 0;
-                    logCurrentCommand(currentInput, cursorLocation);
+                    logCurrentCommand();
                 }
                 else if (character == LINE_FEED)
                 {
@@ -163,9 +163,11 @@ class EHomeShell implements Command
                 {
                     if (cursorLocation > 0)
                     {
-                        send("\u001B[1D \u001B[1D");
+                        String afterCaret = currentInput.toString().substring(cursorLocation) + " ";
+                        String data = "\u001B[1D" + afterCaret + "\u001B[" + afterCaret.length() + "D";
+                        send(data);
                         currentInput.replace(--cursorLocation, cursorLocation + 1, "");
-                        logCurrentCommand(currentInput, cursorLocation);
+                        logCurrentCommand();
                     }
                 }
             }
@@ -188,6 +190,7 @@ class EHomeShell implements Command
             {
                 cursorLocation++;
                 send(escapeSequence);
+                logCurrentCommand();
             }
         }
         else if ("\u001B[D".equals(escapeSequence))
@@ -196,6 +199,7 @@ class EHomeShell implements Command
             {
                 cursorLocation--;
                 send(escapeSequence);
+                logCurrentCommand();
             }
         }
         else if ("\u001B[1;5C".equals(escapeSequence))
@@ -206,6 +210,7 @@ class EHomeShell implements Command
                 int diff = newCursorLocation - cursorLocation;
                 cursorLocation = newCursorLocation;
                 send("\u001B[" + diff + "C");
+                logCurrentCommand();
             }
         }
         else if ("\u001B[1;5D".equals(escapeSequence))
@@ -216,11 +221,12 @@ class EHomeShell implements Command
                 int diff = cursorLocation - newCursorLocation;
                 cursorLocation = newCursorLocation;
                 send("\u001B[" + diff + "D");
+                logCurrentCommand();
             }
         }
     }
 
-    private void logCurrentCommand(StringBuilder currentInput, int cursorLocation)
+    private void logCurrentCommand()
     {
         String command = "";
         for (int i = 0; i < currentInput.length(); i++)
@@ -233,6 +239,10 @@ class EHomeShell implements Command
             {
                 command += currentInput.charAt(i);
             }
+        }
+        if (cursorLocation == currentInput.length())
+        {
+            command += "[]";
         }
         LOG.info("Current command: {}", command);
     }
