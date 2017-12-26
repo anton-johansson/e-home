@@ -15,26 +15,20 @@
  */
 package com.anton.ehome.ssh.cmd;
 
-import static com.google.inject.multibindings.MapBinder.newMapBinder;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.MapBinder;
+import java.io.IOException;
 
 /**
- * Contains IOC bindings for the SSH commands.
+ * A command that shows the current version of the E-Home server application.
  */
-public class CommandModule extends AbstractModule
+class VersionCommand implements ICommand
 {
-    @Override
-    protected void configure()
-    {
-        commands().addBinding("disconnect").to(DisconnectCommand.class);
-        commands().addBinding("version").to(VersionCommand.class).in(Singleton.class);
-    }
+    private static final String VERSION = defaultIfBlank(VersionCommand.class.getPackage().getImplementationVersion(), "Development");
 
-    private MapBinder<String, ICommand> commands()
+    @Override
+    public void execute(ICommunicator communicator) throws IOException
     {
-        return newMapBinder(binder(), String.class, ICommand.class);
+        communicator.newLine().write(VERSION);
     }
 }

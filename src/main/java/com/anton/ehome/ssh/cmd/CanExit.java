@@ -15,26 +15,17 @@
  */
 package com.anton.ehome.ssh.cmd;
 
-import static com.google.inject.multibindings.MapBinder.newMapBinder;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.MapBinder;
+import org.apache.sshd.server.ExitCallback;
 
 /**
- * Contains IOC bindings for the SSH commands.
+ * Defines a command that can exit the shell.
  */
-public class CommandModule extends AbstractModule
+public interface CanExit
 {
-    @Override
-    protected void configure()
-    {
-        commands().addBinding("disconnect").to(DisconnectCommand.class);
-        commands().addBinding("version").to(VersionCommand.class).in(Singleton.class);
-    }
-
-    private MapBinder<String, ICommand> commands()
-    {
-        return newMapBinder(binder(), String.class, ICommand.class);
-    }
+    /**
+     * Sets the {@link ExitCallback exit callback}.
+     *
+     * @param exitCallback The exit callback.
+     */
+    void setExitCallback(ExitCallback exitCallback);
 }

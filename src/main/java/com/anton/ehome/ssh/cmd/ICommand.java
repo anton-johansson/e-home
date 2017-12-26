@@ -15,9 +15,17 @@
  */
 package com.anton.ehome.ssh.cmd;
 
+import java.io.IOException;
+
 /**
  * Defines an executable command.
  */
 public interface ICommand
 {
+    /**
+     * Executes the command.
+     *
+     * @param communicator Communicates with the client over SSH.
+     */
+    void execute(ICommunicator communicator) throws IOException;
 }

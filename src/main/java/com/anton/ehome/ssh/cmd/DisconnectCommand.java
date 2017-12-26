@@ -15,9 +15,27 @@
  */
 package com.anton.ehome.ssh.cmd;
 
+import java.io.IOException;
+
+import org.apache.sshd.server.ExitCallback;
+
 /**
  * A command that disconnects the client from the SSH server.
  */
-public class DisconnectCommand implements ICommand
+class DisconnectCommand implements ICommand, CanExit
 {
+    private ExitCallback exitCallback;
+
+    @Override
+    public void setExitCallback(ExitCallback exitCallback)
+    {
+        this.exitCallback = exitCallback;
+    }
+
+    @Override
+    public void execute(ICommunicator communicator) throws IOException
+    {
+        communicator.newLine().write("Good-bye!").newLine();
+        exitCallback.onExit(0);
+    }
 }

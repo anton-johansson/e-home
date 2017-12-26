@@ -15,26 +15,25 @@
  */
 package com.anton.ehome.ssh.cmd;
 
-import static com.google.inject.multibindings.MapBinder.newMapBinder;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.MapBinder;
+import java.io.IOException;
 
 /**
- * Contains IOC bindings for the SSH commands.
+ * Communicates with the client over SSH.
  */
-public class CommandModule extends AbstractModule
+public interface ICommunicator
 {
-    @Override
-    protected void configure()
-    {
-        commands().addBinding("disconnect").to(DisconnectCommand.class);
-        commands().addBinding("version").to(VersionCommand.class).in(Singleton.class);
-    }
+    /**
+     * Writes data to the client.
+     *
+     * @param output The data to write.
+     * @return Returns the communicator itself, used for chaining.
+     */
+    ICommunicator write(String output) throws IOException;
 
-    private MapBinder<String, ICommand> commands()
-    {
-        return newMapBinder(binder(), String.class, ICommand.class);
-    }
+    /**
+     * Writes a newline to the client.
+     *
+     * @return Returns the communicator itself, used for chaining.
+     */
+    ICommunicator newLine() throws IOException;
 }

@@ -29,13 +29,16 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sshd.common.SshException;
+import org.apache.sshd.common.channel.WindowClosedException;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.ssh.cmd.CanExit;
 import com.anton.ehome.ssh.cmd.ICommand;
+import com.anton.ehome.ssh.cmd.ICommunicator;
 import com.google.inject.Inject;
 
 /**
@@ -152,17 +155,21 @@ class EHomeShell implements Command
                 }
                 else if (character == END_OF_TRANSMISSION)
                 {
-                    send("\r\nBye!\r\n");
+                    send("\r\nGood-bye!\r\n");
                     exitCallback.onExit(0);
                     return;
                 }
                 else if (character == CARRIAGE_RETURN)
                 {
-                    send("\r\n\r\n");
-                    displayPrompt();
+                    StringTokenizer tokenizer = new StringTokenizer(currentInput.toString());
                     currentInput.setLength(0);
                     cursorLocation = 0;
-                    logCurrentCommand();
+                    if (tokenizer.hasMoreTokens())
+                    {
+                        executeCommand(tokenizer);
+                    }
+                    send("\r\n\r\n");
+                    displayPrompt();
                 }
                 else if (character == LINE_FEED)
                 {
@@ -196,6 +203,10 @@ class EHomeShell implements Command
                 }
             }
         }
+        catch (WindowClosedException e)
+        {
+            LOG.info("The client closed the connection");
+        }
         catch (SshException | InterruptedIOException e)
         {
             LOG.warn("The SSH connection was forcibly shut down", e);
@@ -203,6 +214,23 @@ class EHomeShell implements Command
         catch (IOException e)
         {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void executeCommand(StringTokenizer tokenizer) throws IOException
+    {
+        String commandName = tokenizer.nextToken();
+        ICommand command = commands.get(commandName);
+        if (command == null)
+        {
+            send("\r\ncommand not found: " + commandName);
+            lastCommandSuccess = false;
+        }
+        else
+        {
+            Communicator communicator = new Communicator();
+            command.execute(communicator);
+            lastCommandSuccess = true;
         }
     }
 
@@ -377,5 +405,31 @@ class EHomeShell implements Command
     public void setExitCallback(ExitCallback callback)
     {
         this.exitCallback = callback;
+
+        commands.values()
+            .stream()
+            .filter(command -> command instanceof CanExit)
+            .map(command -> CanExit.class.cast(command))
+            .forEach(command -> command.setExitCallback(callback));
+    }
+
+    /**
+     * Default implementation of {@link ICommunicator}.
+     */
+    private class Communicator implements ICommunicator
+    {
+        @Override
+        public ICommunicator write(String output) throws IOException
+        {
+            send(output);
+            return this;
+        }
+
+        @Override
+        public ICommunicator newLine() throws IOException
+        {
+            send("\r\n");
+            return this;
+        }
     }
 }
