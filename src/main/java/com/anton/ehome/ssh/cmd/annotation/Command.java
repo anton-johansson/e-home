@@ -13,23 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
+package com.anton.ehome.ssh.cmd.annotation;
 
-import java.io.IOException;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.anton.ehome.ssh.cmd.annotation.Command;
-import com.anton.ehome.ssh.cmd.execption.DisconnectException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * A command that disconnects the client from the SSH server.
+ * Defines a command.
  */
-@Command(name = "disconnect", description = "Disconnects from the SSH server session")
-class DisconnectCommand implements ICommand
+@Target(TYPE)
+@Retention(RUNTIME)
+public @interface Command
 {
-    @Override
-    public void execute(ICommunicator communicator) throws IOException
-    {
-        communicator.newLine().write("Good-bye!").newLine();
-        throw new DisconnectException();
-    }
+    /**
+     * The group of the command.
+     */
+    String group() default "";
+
+    /**
+     * The name (or key) of the command.
+     */
+    String name();
+
+    /**
+     * The description of the command.
+     */
+    String description();
 }

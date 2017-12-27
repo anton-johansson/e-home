@@ -25,11 +25,16 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.whizzosoftware.wzwave.commandclass.ManufacturerSpecificCommandClass;
+import com.whizzosoftware.wzwave.commandclass.MeterCommandClass;
+import com.whizzosoftware.wzwave.commandclass.MeterCommandClass.MeterReadingValue;
+import com.whizzosoftware.wzwave.commandclass.MeterCommandClass.Scale;
 import com.whizzosoftware.wzwave.controller.ZWaveController;
 import com.whizzosoftware.wzwave.controller.ZWaveControllerListener;
 import com.whizzosoftware.wzwave.controller.netty.NettyZWaveController;
 import com.whizzosoftware.wzwave.node.NodeInfo;
 import com.whizzosoftware.wzwave.node.ZWaveEndpoint;
+import com.whizzosoftware.wzwave.product.ProductInfo;
 
 /**
  * Contains the applications main entry-point.
@@ -81,6 +86,16 @@ public class ZWaveStuff
         {
             System.out.println("#onZWaveNodeAdded");
             System.out.println(node);
+
+            ManufacturerSpecificCommandClass commandClass = (ManufacturerSpecificCommandClass) node.getCommandClass(ManufacturerSpecificCommandClass.ID);
+            if (commandClass != null)
+            {
+                ProductInfo productInfo = commandClass.getProductInfo();
+                String manufacturer = productInfo.getManufacturer();
+                String name = productInfo.getName();
+
+                System.out.println("NodeId " + node.getNodeId() + " is a '" + name + "' manufactured by '" + manufacturer + "'");
+            }
         }
 
         @Override
@@ -88,6 +103,13 @@ public class ZWaveStuff
         {
             System.out.println("#onZWaveNodeUpdated");
             System.out.println(node);
+
+            if (node.getNodeId() == 2)
+            {
+                MeterCommandClass commandClass = (MeterCommandClass) node.getCommandClass(MeterCommandClass.ID);
+                MeterReadingValue value = commandClass.getLastValue(Scale.Watts);
+                System.out.println("Watts is " + value.getCurrentValue() + ", previously " + value.getPreviousValue() + " (a change of " + value.getDelta() + ")");
+            }
         }
 
         @Override

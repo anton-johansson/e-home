@@ -19,16 +19,23 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.io.IOException;
 
+import com.anton.ehome.ssh.cmd.annotation.Command;
+import com.anton.ehome.ssh.cmd.annotation.Option;
+
 /**
  * A command that shows the current version of the E-Home server application.
  */
+@Command(name = "version", description = "Prints the version of the E-Home server application")
 class VersionCommand implements ICommand
 {
     private static final String VERSION = defaultIfBlank(VersionCommand.class.getPackage().getImplementationVersion(), "Development");
 
+    @Option(name = "verbose", defaultIfIncluded = "true", defaultIfOmitted = "false", description = "Whether or not to display version information about dependencies and used libraries")
+    private boolean verbose;
+
     @Override
     public void execute(ICommunicator communicator) throws IOException
     {
-        communicator.newLine().write(VERSION);
+        communicator.newLine().write(VERSION + " (" + verbose + ")");
     }
 }
