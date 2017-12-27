@@ -10,5 +10,5 @@
 [1m     E-Home [0m(0.0.1-SNAPSHOT) by [1mAnton Johansson[0m
 
 Welcome [33m[1m${user}[0m!
-Hit '[1m<tab>[0m' to show available commands.
-Hit '[1m<ctrl-d>[0m' or type '[1mdisconnect[0m' to close the connection.
+Hit '[1m<tab>[0m' or type '[1mhelp[0m' to show available commands
+Hit '[1m<ctrl-d>[0m' or type '[1mdisconnect[0m' to close the connection

@@ -36,9 +36,10 @@ import org.apache.sshd.server.ExitCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.anton.ehome.ssh.cmd.CanExit;
+import com.anton.ehome.ssh.cmd.CommandMetaData;
 import com.anton.ehome.ssh.cmd.ICommand;
 import com.anton.ehome.ssh.cmd.ICommunicator;
+import com.anton.ehome.ssh.cmd.execption.DisconnectException;
 import com.google.inject.Inject;
 
 /**
@@ -65,7 +66,7 @@ class EHomeShell implements Command
     private static final List<Character> ANSI_ESCAPE_ENDINGS = asList('A', 'B', 'C', 'D', 'm', '\u001B');
 
     private final WelcomeTextProvider welcomeTextProvider;
-    private final Map<String, ICommand> commands;
+    private final Map<String, CommandMetaData> commands;
     private final Thread thread;
     private InputStream input;
     private OutputStream output;
@@ -77,7 +78,7 @@ class EHomeShell implements Command
     private boolean lastCommandSuccess = true;
 
     @Inject
-    EHomeShell(WelcomeTextProvider welcomeTextProvider, Map<String, ICommand> commands)
+    EHomeShell(WelcomeTextProvider welcomeTextProvider, Map<String, CommandMetaData> commands)
     {
         this.welcomeTextProvider = welcomeTextProvider;
         this.commands = commands;
@@ -198,7 +199,7 @@ class EHomeShell implements Command
                     {
                         String command = tokenizer.nextToken();
                         String data = StringUtils.substringAfter(currentInput.toString(), command);
-                        Optional.ofNullable(commands.get(command)).ifPresent(implementation -> autocompleteCommand(implementation, data));
+                        Optional.ofNullable(commands.get(command)).ifPresent(metaData -> autocompleteCommand(metaData, data));
                     }
                 }
             }
@@ -219,18 +220,36 @@ class EHomeShell implements Command
 
     private void executeCommand(StringTokenizer tokenizer) throws IOException
     {
+        LOG.info("Executing command: {}", currentInput.toString());
+
         String commandName = tokenizer.nextToken();
-        ICommand command = commands.get(commandName);
-        if (command == null)
+        CommandMetaData metaData = commands.get(commandName);
+        if (metaData == null)
         {
+            LOG.info("Command was not found");
             send("\r\ncommand not found: " + commandName);
             lastCommandSuccess = false;
         }
         else
         {
             Communicator communicator = new Communicator();
-            command.execute(communicator);
-            lastCommandSuccess = true;
+            ICommand command = metaData.getConstructor().get();
+
+            try
+            {
+                command.execute(communicator);
+                lastCommandSuccess = true;
+            }
+            catch (DisconnectException e)
+            {
+                LOG.info("Command requested disconnect");
+                exitCallback.onExit(0);
+            }
+            catch (Exception e)
+            {
+                LOG.error("Unhandled exception occurred while executing the command", e);
+                lastCommandSuccess = false;
+            }
         }
     }
 
@@ -256,9 +275,9 @@ class EHomeShell implements Command
         }
     }
 
-    private void autocompleteCommand(ICommand command, String data)
+    private void autocompleteCommand(CommandMetaData metaData, String data)
     {
-        LOG.warn("Autocompleting commands aren't implemented ({} with data: {}", command.getClass().getSimpleName(), data);
+        LOG.warn("Autocompleting commands aren't implemented ({} with data: {})", metaData.getName(), data);
     }
 
     private void handleAnsiEscapeSequence(String escapeSequence) throws IOException
@@ -405,12 +424,6 @@ class EHomeShell implements Command
     public void setExitCallback(ExitCallback callback)
     {
         this.exitCallback = callback;
-
-        commands.values()
-            .stream()
-            .filter(command -> command instanceof CanExit)
-            .map(command -> CanExit.class.cast(command))
-            .forEach(command -> command.setExitCallback(callback));
     }
 
     /**

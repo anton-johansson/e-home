@@ -13,19 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
-
-import org.apache.sshd.server.ExitCallback;
+package com.anton.ehome.ssh.cmd.execption;
 
 /**
- * Defines a command that can exit the shell.
+ * Exception that is thrown when a command wants to disconnect the client.
  */
-public interface CanExit
+public class DisconnectException extends RuntimeException
 {
-    /**
-     * Sets the {@link ExitCallback exit callback}.
-     *
-     * @param exitCallback The exit callback.
-     */
-    void setExitCallback(ExitCallback exitCallback);
 }

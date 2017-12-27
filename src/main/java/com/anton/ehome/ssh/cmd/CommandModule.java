@@ -16,10 +16,19 @@
 package com.anton.ehome.ssh.cmd;
 
 import static com.google.inject.multibindings.MapBinder.newMapBinder;
+import static java.util.stream.Collectors.toList;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import com.anton.ehome.ssh.cmd.annotation.Command;
+import com.anton.ehome.ssh.cmd.annotation.Option;
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
-import com.google.inject.multibindings.MapBinder;
 
 /**
  * Contains IOC bindings for the SSH commands.
@@ -29,12 +38,62 @@ public class CommandModule extends AbstractModule
     @Override
     protected void configure()
     {
-        commands().addBinding("disconnect").to(DisconnectCommand.class);
-        commands().addBinding("version").to(VersionCommand.class).in(Singleton.class);
+        command(DisconnectCommand.class);
+        command(HelpCommand.class);
+        command(VersionCommand.class);
     }
 
-    private MapBinder<String, ICommand> commands()
+    private <C extends ICommand> void command(Class<C> commandClass)
     {
-        return newMapBinder(binder(), String.class, ICommand.class);
+        Command command = Optional.ofNullable(commandClass.getAnnotation(Command.class))
+                .orElseThrow(() -> new RuntimeException(commandClass.getSimpleName() + " is not annotated with @Command"));
+
+        Supplier<ICommand> constructor = binder().getProvider(commandClass)::get;
+        List<CommandOptionMetaData> options = Stream.of(commandClass.getFields())
+                .filter(field -> field.getAnnotation(Option.class) != null)
+                .map(field -> getMetaDataForOption(field))
+                .collect(toList());
+
+        CommandMetaData metaData = new CommandMetaData(command, constructor, options);
+        newMapBinder(binder(), String.class, CommandMetaData.class).addBinding(metaData.getCommandKey()).toInstance(metaData);
+    }
+
+    private CommandOptionMetaData getMetaDataForOption(Field field)
+    {
+        Class<?> type = field.getType();
+        boolean multiple = isMultiple(type);
+        Function<String, Object> converter = getConverter(field);
+
+        Option option = field.getAnnotation(Option.class);
+        return new CommandOptionMetaData(option, multiple, converter);
+    }
+
+    private boolean isMultiple(Class<?> type)
+    {
+        return List.class.equals(type);
+    }
+
+    private Function<String, Object> getConverter(Field field)
+    {
+        Class<?> type = getActualType(field);
+        if (boolean.class.equals(type))
+        {
+            return input -> "true".equals(input);
+        }
+        else
+        {
+            throw new RuntimeException("Unknown type (" + type + ") for option field: " + field);
+        }
+    }
+
+    private Class<?> getActualType(Field field)
+    {
+        Class<?> type = field.getType();
+        if (isMultiple(type))
+        {
+            ParameterizedType genericType = (ParameterizedType) field.getGenericType();
+            type = (Class<?>) genericType.getActualTypeArguments()[0];
+        }
+        return type;
     }
 }
