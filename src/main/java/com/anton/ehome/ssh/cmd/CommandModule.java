@@ -49,7 +49,7 @@ public class CommandModule extends AbstractModule
                 .orElseThrow(() -> new RuntimeException(commandClass.getSimpleName() + " is not annotated with @Command"));
 
         Supplier<ICommand> constructor = binder().getProvider(commandClass)::get;
-        List<CommandOptionMetaData> options = Stream.of(commandClass.getFields())
+        List<CommandOptionMetaData> options = Stream.of(commandClass.getDeclaredFields())
                 .filter(field -> field.getAnnotation(Option.class) != null)
                 .map(field -> getMetaDataForOption(field))
                 .collect(toList());
@@ -63,9 +63,8 @@ public class CommandModule extends AbstractModule
         Class<?> type = field.getType();
         boolean multiple = isMultiple(type);
         Function<String, Object> converter = getConverter(field);
-
         Option option = field.getAnnotation(Option.class);
-        return new CommandOptionMetaData(option, multiple, converter);
+        return new CommandOptionMetaData(option, field, multiple, converter);
     }
 
     private boolean isMultiple(Class<?> type)
@@ -75,9 +74,18 @@ public class CommandModule extends AbstractModule
 
     private Function<String, Object> getConverter(Field field)
     {
+        Option option = field.getAnnotation(Option.class);
         Class<?> type = getActualType(field);
         if (boolean.class.equals(type))
         {
+            if (option.acceptsValue())
+            {
+                throw new RuntimeException("Boolean options cannot accept values");
+            }
+            if (!Option.UNSPECIFIED.equals(option.defaultValue()))
+            {
+                throw new RuntimeException("Boolean options cannot have default values");
+            }
             return input -> "true".equals(input);
         }
         else

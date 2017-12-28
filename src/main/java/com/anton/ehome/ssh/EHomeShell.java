@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sshd.common.SshException;
 import org.apache.sshd.common.channel.WindowClosedException;
 import org.apache.sshd.server.Command;
@@ -37,9 +38,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.ssh.cmd.CommandMetaData;
+import com.anton.ehome.ssh.cmd.CommandOptionMetaData;
 import com.anton.ehome.ssh.cmd.ICommand;
 import com.anton.ehome.ssh.cmd.ICommunicator;
 import com.anton.ehome.ssh.cmd.execption.DisconnectException;
+import com.anton.ehome.ssh.cmd.execption.UnknownOptionException;
 import com.google.inject.Inject;
 
 /**
@@ -235,10 +238,17 @@ class EHomeShell implements Command
             Communicator communicator = new Communicator();
             ICommand command = metaData.getConstructor().get();
 
+            lastCommandSuccess = false;
             try
             {
+                parseOptionsAndArguments(tokenizer, command, metaData);
                 command.execute(communicator);
                 lastCommandSuccess = true;
+            }
+            catch (UnknownOptionException e)
+            {
+                LOG.debug("An unknown option was used: " + e.getOptionName());
+                send("\r\n" + e.getMessage());
             }
             catch (DisconnectException e)
             {
@@ -248,7 +258,45 @@ class EHomeShell implements Command
             catch (Exception e)
             {
                 LOG.error("Unhandled exception occurred while executing the command", e);
-                lastCommandSuccess = false;
+                send("\r\nUnknown error occurred: " + e.getMessage());
+            }
+        }
+    }
+
+    private void parseOptionsAndArguments(StringTokenizer tokenizer, ICommand command, CommandMetaData metaData) throws UnknownOptionException
+    {
+        while (tokenizer.hasMoreTokens())
+        {
+            String token = tokenizer.nextToken();
+            if (token.startsWith("--"))
+            {
+                String optionName = token.substring(2);
+                CommandOptionMetaData optionMetaData = metaData.getOptions()
+                        .stream()
+                        .filter(meta -> meta.getName().equals(optionName))
+                        .findAny()
+                        .orElseThrow(() -> new UnknownOptionException(optionName));
+
+                if (optionMetaData.isAcceptsValue())
+                {
+                    throw new UnsupportedOperationException("Options with values are not yet implemented");
+                }
+                else
+                {
+                    Object value = optionMetaData.getConverter().apply("true");
+                    try
+                    {
+                        FieldUtils.writeField(optionMetaData.getField(), command, value, true);
+                    }
+                    catch (IllegalAccessException e)
+                    {
+                        throw new RuntimeException("Could not set option value", e);
+                    }
+                }
+            }
+            else
+            {
+                throw new UnsupportedOperationException("Arguments are not yet implemented");
             }
         }
     }
