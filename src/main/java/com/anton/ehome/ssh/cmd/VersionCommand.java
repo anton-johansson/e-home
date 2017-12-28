@@ -19,6 +19,8 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.io.IOException;
 
+import org.apache.sshd.server.SshServer;
+
 import com.anton.ehome.ssh.cmd.annotation.Command;
 import com.anton.ehome.ssh.cmd.annotation.Option;
 
@@ -30,12 +32,23 @@ class VersionCommand implements ICommand
 {
     private static final String VERSION = defaultIfBlank(VersionCommand.class.getPackage().getImplementationVersion(), "Development");
 
-    @Option(name = "verbose", defaultIfIncluded = "true", defaultIfOmitted = "false", description = "Whether or not to display version information about dependencies and used libraries")
+    @Option(name = "verbose", description = "Whether or not to display version information about dependencies and used libraries")
     private boolean verbose;
 
     @Override
     public void execute(ICommunicator communicator) throws IOException
     {
-        communicator.newLine().write(VERSION + " (" + verbose + ")");
+        if (verbose)
+        {
+            communicator
+                    .newLine()
+                    .write("E-Home version: " + VERSION)
+                    .newLine()
+                    .write("Apache mina-sshd version: " + SshServer.class.getPackage().getImplementationVersion());
+        }
+        else
+        {
+            communicator.newLine().write(VERSION);
+        }
     }
 }

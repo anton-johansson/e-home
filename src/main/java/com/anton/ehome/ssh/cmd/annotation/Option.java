@@ -47,12 +47,7 @@ public @interface Option
     boolean acceptsValue() default false;
 
     /**
-     * The default value to use if this option is specified, but no value is given.
-     */
-    String defaultIfIncluded() default UNSPECIFIED;
-
-    /**
      * The default value to use if this option is omitted from the command.
      */
-    String defaultIfOmitted() default UNSPECIFIED;
+    String defaultValue() default UNSPECIFIED;
 }

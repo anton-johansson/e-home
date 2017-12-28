@@ -15,6 +15,7 @@
  */
 package com.anton.ehome.ssh.cmd;
 
+import java.lang.reflect.Field;
 import java.util.function.Function;
 
 import com.anton.ehome.ssh.cmd.annotation.Command;
@@ -25,23 +26,28 @@ import com.anton.ehome.ssh.cmd.annotation.Option;
  */
 public class CommandOptionMetaData
 {
+    private final Field field;
     private final String name;
     private final String description;
     private final boolean acceptsValue;
-    private final String defaultIfIncluded;
-    private final String defaultIfOmitted;
+    private final String defaultValue;
     private final boolean multiple;
     private final Function<String, Object> converter;
 
-    CommandOptionMetaData(Option option, boolean multiple, Function<String, Object> converter)
+    CommandOptionMetaData(Option option, Field field, boolean multiple, Function<String, Object> converter)
     {
+        this.field = field;
         this.name = option.name();
         this.description = option.description();
         this.acceptsValue = option.acceptsValue();
-        this.defaultIfIncluded = option.defaultIfIncluded();
-        this.defaultIfOmitted = option.defaultIfOmitted();
+        this.defaultValue = option.defaultValue();
         this.multiple = multiple;
         this.converter = converter;
+    }
+
+    public Field getField()
+    {
+        return field;
     }
 
     public String getName()
@@ -59,18 +65,18 @@ public class CommandOptionMetaData
         return acceptsValue;
     }
 
-    public String getDefaultIfIncluded()
+    public String getDefaultValue()
     {
-        return defaultIfIncluded;
-    }
-
-    public String getDefaultIfOmitted()
-    {
-        return defaultIfOmitted;
+        return defaultValue;
     }
 
     public boolean isMultiple()
     {
         return multiple;
+    }
+
+    public Function<String, Object> getConverter()
+    {
+        return converter;
     }
 }
