@@ -15,8 +15,11 @@
  */
 package com.anton.ehome.ssh;
 
+import static com.anton.ehome.utils.StringUtils.getMutualStart;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isWhitespace;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -194,7 +197,7 @@ class EHomeShell implements Command
                 {
                     StringTokenizer tokenizer = new StringTokenizer(currentInput.toString());
                     int tokens = tokenizer.countTokens();
-                    if (tokens == 1)
+                    if (tokens == 1 && !isPreviousCharacterWhitespace())
                     {
                         autocompleteFirst();
                     }
@@ -219,6 +222,11 @@ class EHomeShell implements Command
         {
             throw new RuntimeException(e);
         }
+    }
+
+    private boolean isPreviousCharacterWhitespace()
+    {
+        return cursorLocation > 0 && isWhitespace(currentInput.toString().substring(cursorLocation - 1, cursorLocation));
     }
 
     private void executeCommand(StringTokenizer tokenizer) throws IOException
@@ -309,15 +317,34 @@ class EHomeShell implements Command
                 .filter(key -> key.startsWith(input))
                 .collect(toList());
 
-        if (matchingCommands.size() == 1)
+        if (matchingCommands.isEmpty())
         {
-            String command = matchingCommands.get(0);
+            LOG.debug("There are no matching commands to auto-complete");
+        }
+        else if (matchingCommands.size() == 1)
+        {
+            String command = matchingCommands.get(0) + " ";
             if (input.length() < command.length())
             {
-                String missing = command.substring(input.length());
-                currentInput.append(missing);
-                cursorLocation += missing.length();
-                send(missing);
+                String data = command.substring(input.length());
+                currentInput.append(data);
+                cursorLocation += data.length();
+                send(data);
+                logCurrentCommand();
+            }
+        }
+        else
+        {
+            String mutualStart = getMutualStart(matchingCommands, input.length());
+            if (isBlank(mutualStart))
+            {
+                LOG.warn("Cycling through auto-completion values are not yet supported");
+            }
+            else
+            {
+                currentInput.append(mutualStart);
+                cursorLocation += mutualStart.length();
+                send(mutualStart);
                 logCurrentCommand();
             }
         }
