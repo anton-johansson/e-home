@@ -37,7 +37,13 @@ public class DaoModule extends AbstractModule
     @Override
     protected void configure()
     {
-        bind(IConfigDao.class).to(ConfigDao.class).in(Singleton.class);
+        bindDao(IConfigDao.class, ConfigDao.class);
+        bindDao(IUserDao.class, UserDao.class);
+    }
+
+    private <Int, Impl extends Int> void bindDao(Class<Int> interFace, Class<Impl> implementation)
+    {
+        bind(interFace).to(implementation).in(Singleton.class);
     }
 
     /**
@@ -53,6 +59,9 @@ public class DaoModule extends AbstractModule
 
         LOG.debug("Making sure that database '{}' exists", DATABASE_NAME);
         influx.createDatabase(DATABASE_NAME);
+
+        LOG.debug("Making sure retention policies exists");
+        InfluxUtils.createRetentionPolicies(influx);
 
         return influx;
     }
