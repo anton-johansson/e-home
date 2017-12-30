@@ -21,12 +21,14 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isWhitespace;
+import static org.apache.commons.lang3.StringUtils.repeat;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,9 +70,10 @@ class EHomeShell implements Command
             65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, // A-Z
             97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122 // a-z
     );
-
     private static final List<Character> ANSI_ESCAPE_ENDINGS = asList('A', 'B', 'C', 'D', 'm', '\u001B');
+    private static final int COMMAND_HISTORY_SIZE = 10;
 
+    private final List<String> commandHistory = new ArrayList<>(COMMAND_HISTORY_SIZE);
     private final WelcomeTextProvider welcomeTextProvider;
     private final Map<String, CommandMetaData> commands;
     private final Thread thread;
@@ -82,6 +85,7 @@ class EHomeShell implements Command
     private final StringBuilder currentInput = new StringBuilder();
     private int cursorLocation;
     private boolean lastCommandSuccess = true;
+    private int commandHistoryIndex = -1;
 
     @Inject
     EHomeShell(WelcomeTextProvider welcomeTextProvider, Map<String, CommandMetaData> commands)
@@ -125,6 +129,9 @@ class EHomeShell implements Command
             {
                 char character = (char) input.read();
 
+                DataState state = new DataState();
+                state.setCancelledHistoryCycling(true);
+
                 if (ECHO_BYTES.contains((int) character))
                 {
                     String afterCursor = currentInput.substring(cursorLocation);
@@ -149,7 +156,7 @@ class EHomeShell implements Command
                             break;
                         }
                     }
-                    handleAnsiEscapeSequence(escapeSequence);
+                    handleAnsiEscapeSequence(escapeSequence, state);
                 }
                 else if (character == END_OF_TEXT)
                 {
@@ -168,6 +175,7 @@ class EHomeShell implements Command
                 }
                 else if (character == CARRIAGE_RETURN)
                 {
+                    addCommandToHistory(currentInput.toString());
                     StringTokenizer tokenizer = new StringTokenizer(currentInput.toString());
                     currentInput.setLength(0);
                     cursorLocation = 0;
@@ -208,6 +216,16 @@ class EHomeShell implements Command
                         Optional.ofNullable(commands.get(command)).ifPresent(metaData -> autocompleteCommand(metaData, data));
                     }
                 }
+                else
+                {
+                    LOG.info("Unhandled character received: {}", character);
+                    state.setCancelledHistoryCycling(false);
+                }
+
+                if (commandHistoryIndex >= 0 && state.isCancelledHistoryCycling())
+                {
+                    commandHistoryIndex = -1;
+                }
             }
         }
         catch (WindowClosedException e)
@@ -222,6 +240,20 @@ class EHomeShell implements Command
         {
             throw new RuntimeException(e);
         }
+    }
+
+    private void addCommandToHistory(String command)
+    {
+        if (!commandHistory.isEmpty() && command.equals(commandHistory.get(0)))
+        {
+            return;
+        }
+
+        if (commandHistory.size() == COMMAND_HISTORY_SIZE)
+        {
+            commandHistory.remove(commandHistory.size() - 1);
+        }
+        commandHistory.add(0, command);
     }
 
     private boolean isPreviousCharacterWhitespace()
@@ -292,7 +324,7 @@ class EHomeShell implements Command
                 else
                 {
                     Object value = optionMetaData.getConverter().apply("true");
-                    writeField(optionMetaData.getField(), command, value);;
+                    writeField(optionMetaData.getField(), command, value);
                 }
             }
             else
@@ -348,7 +380,7 @@ class EHomeShell implements Command
         LOG.warn("Autocompleting commands aren't implemented ({} with data: {})", metaData.getName(), data);
     }
 
-    private void handleAnsiEscapeSequence(String escapeSequence) throws IOException
+    private void handleAnsiEscapeSequence(String escapeSequence, DataState state) throws IOException
     {
         // RIGHT
         if ("\u001B[C".equals(escapeSequence))
@@ -435,6 +467,85 @@ class EHomeShell implements Command
                 logCurrentCommand();
             }
         }
+
+        // UP
+        else if ("\u001B[A".equals(escapeSequence))
+        {
+            state.setCancelledHistoryCycling(false);
+            if (!commandHistory.isEmpty())
+            {
+                commandHistoryCycleUp();
+            }
+        }
+
+        // DOWN
+        else if ("\u001B[B".equals(escapeSequence))
+        {
+            state.setCancelledHistoryCycling(false);
+            if (commandHistoryIndex >= 0)
+            {
+                commandHistoryCycleDown();
+            }
+        }
+    }
+
+    private void commandHistoryCycleUp() throws IOException
+    {
+        int previous = commandHistoryIndex;
+        if (!isCyclingCommandHistory())
+        {
+            if (currentInput.length() == 0)
+            {
+                commandHistoryIndex = 0;
+            }
+        }
+        else if (commandHistoryIndex < commandHistory.size() - 1)
+        {
+            commandHistoryIndex++;
+        }
+
+        if (commandHistoryIndex != previous)
+        {
+            String oldInput = currentInput.toString();
+            String newInput = commandHistory.get(commandHistoryIndex);
+            commandHistoryCycleImpl(oldInput, newInput);
+        }
+    }
+
+    private void commandHistoryCycleImpl(String oldInput, String newInput) throws IOException
+    {
+        StringBuilder data = new StringBuilder();
+        if (cursorLocation != 0)
+        {
+            data.append("\u001B[" + cursorLocation + "D");
+        }
+        data.append(newInput);
+        int charactersToErase = oldInput.length() - newInput.length();
+        if (charactersToErase > 0)
+        {
+            data.append(repeat(' ', charactersToErase));
+            data.append("\u001B[" + charactersToErase + "D");
+        }
+        send(data.toString());
+
+        currentInput.setLength(0);
+        currentInput.append(newInput);
+        cursorLocation = newInput.length();
+        logCurrentCommand();
+    }
+
+    private void commandHistoryCycleDown() throws IOException
+    {
+        commandHistoryIndex--;
+
+        String oldInput = currentInput.toString();
+        String newInput = commandHistoryIndex >= 0 ? commandHistory.get(commandHistoryIndex) : "";
+        commandHistoryCycleImpl(oldInput, newInput);
+    }
+
+    private boolean isCyclingCommandHistory()
+    {
+        return commandHistoryIndex >= 0;
     }
 
     private void logCurrentCommand()
