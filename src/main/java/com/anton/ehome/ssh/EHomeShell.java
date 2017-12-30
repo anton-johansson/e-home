@@ -15,11 +15,13 @@
  */
 package com.anton.ehome.ssh;
 
+import static com.anton.ehome.utils.ReflectionUtils.writeField;
 import static com.anton.ehome.utils.StringUtils.getMutualStart;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isWhitespace;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,8 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.sshd.common.SshException;
 import org.apache.sshd.common.channel.WindowClosedException;
 import org.apache.sshd.server.Command;
@@ -204,7 +204,7 @@ class EHomeShell implements Command
                     else if (tokens > 1)
                     {
                         String command = tokenizer.nextToken();
-                        String data = StringUtils.substringAfter(currentInput.toString(), command);
+                        String data = substringAfter(currentInput.toString(), command);
                         Optional.ofNullable(commands.get(command)).ifPresent(metaData -> autocompleteCommand(metaData, data));
                     }
                 }
@@ -292,14 +292,7 @@ class EHomeShell implements Command
                 else
                 {
                     Object value = optionMetaData.getConverter().apply("true");
-                    try
-                    {
-                        FieldUtils.writeField(optionMetaData.getField(), command, value, true);
-                    }
-                    catch (IllegalAccessException e)
-                    {
-                        throw new RuntimeException("Could not set option value", e);
-                    }
+                    writeField(optionMetaData.getField(), command, value);;
                 }
             }
             else
