@@ -58,17 +58,15 @@ abstract class AbstractDao
     }
 
     /**
-     * Performs a query against the {@link InfluxDB}.
+     * Performs a query against the {@link InfluxDB} to select one single item.
      *
      * @param query The query to perform.
+     * @param clazz The class to convert the result too.
      * @return The result.
      */
     protected final <T> Optional<T> selectOne(String query, Class<T> clazz)
     {
-        LOG.debug("Executing query: " + query);
-
-        QueryResult result = influx.query(new Query(query, DATABASE_NAME));
-        List<T> objects = MAPPER.toPOJO(result, clazz);
+        List<T> objects = selectMany(query, clazz);
         if (objects.size() > 1)
         {
             LOG.error("The query generated more than one result");
@@ -84,6 +82,20 @@ abstract class AbstractDao
             LOG.trace("The query generated exactly one object, as expected");
             return Optional.of(objects.get(0));
         }
+    }
+
+    /**
+     * Performs a query against the {@link InfluxDB} and returns multiple results.
+     *
+     * @param query The query to perform.
+     * @param clazz The class to convert results to.
+     * @return Returns the list of items found.
+     */
+    protected final <T> List<T> selectMany(String query, Class<T> clazz)
+    {
+        LOG.debug("Executing query: {}", query);
+        QueryResult result = influx.query(new Query(query, DATABASE_NAME));
+        return MAPPER.toPOJO(result, clazz);
     }
 
     /**
@@ -116,12 +128,29 @@ abstract class AbstractDao
         private final String measurement;
         private final long time;
         private final Builder builder;
+        private String retentionPolicy;
 
         private InsertMeasurementBuilder(String measurement)
         {
             this.measurement = measurement;
             this.time = System.currentTimeMillis();
             builder = Point.measurement(measurement).time(time, MILLISECONDS);
+        }
+
+        /**
+         * Sets the retention policy of the data that is inserted.
+         *
+         * @param retentionPolicy The retention policy to use.
+         * @return Returns the builder.
+         */
+        protected InsertMeasurementBuilder retentionPolicy(String retentionPolicy)
+        {
+            if (this.retentionPolicy != null)
+            {
+                throw new IllegalStateException("retentionPolicy can't be set twice");
+            }
+            this.retentionPolicy = retentionPolicy;
+            return this;
         }
 
         /**
@@ -179,7 +208,7 @@ abstract class AbstractDao
         protected void execute()
         {
             LOG.debug("Executing insert statement for measurement '{}'", measurement);
-            influx.write(DATABASE_NAME, null, builder.build());
+            influx.write(DATABASE_NAME, retentionPolicy, builder.build());
         }
     }
 }

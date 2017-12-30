@@ -25,8 +25,21 @@ final class InfluxUtils
     /** The name of the Influx database used for the E-Home server application. */
     static final String DATABASE_NAME = "e-home";
 
+    /** A retention policy that expire after one hour. */
+    static final String RETENTION_POLICY_ONE_HOUR = "one-hour";
+
     // Prevent instantiation
     private InfluxUtils()
     {
+    }
+
+    /**
+     * Creates required retention policies.
+     *
+     * @param influx The {@link InfluxDB} instance.
+     */
+    static void createRetentionPolicies(InfluxDB influx)
+    {
+        influx.createRetentionPolicy(RETENTION_POLICY_ONE_HOUR, DATABASE_NAME, "60m", 1, true);
     }
 }

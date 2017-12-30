@@ -42,6 +42,7 @@ import org.apache.sshd.server.ExitCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.dao.IUserDao;
 import com.anton.ehome.ssh.cmd.CommandMetaData;
 import com.anton.ehome.ssh.cmd.CommandOptionMetaData;
 import com.anton.ehome.ssh.cmd.ICommand;
@@ -76,22 +77,25 @@ class EHomeShell implements Command
     private final List<String> commandHistory = new ArrayList<>(COMMAND_HISTORY_SIZE);
     private final WelcomeTextProvider welcomeTextProvider;
     private final Map<String, CommandMetaData> commands;
+    private final IUserDao userDao;
     private final Thread thread;
     private InputStream input;
     private OutputStream output;
     private ExitCallback exitCallback;
 
     // Current shell state
+    private String user;
     private final StringBuilder currentInput = new StringBuilder();
     private int cursorLocation;
     private boolean lastCommandSuccess = true;
     private int commandHistoryIndex = -1;
 
     @Inject
-    EHomeShell(WelcomeTextProvider welcomeTextProvider, Map<String, CommandMetaData> commands)
+    EHomeShell(WelcomeTextProvider welcomeTextProvider, Map<String, CommandMetaData> commands, IUserDao userDao)
     {
         this.welcomeTextProvider = welcomeTextProvider;
         this.commands = commands;
+        this.userDao = userDao;
         this.thread = new Thread(this::thread, "ssh-thread");
     }
 
@@ -102,7 +106,9 @@ class EHomeShell implements Command
         {
             LOG.info("Received signal: {}({})", signal.name(), signal.getNumeric());
         });
-        String user = environment.getEnv().get(Environment.ENV_USER);
+        user = environment.getEnv().get(Environment.ENV_USER);
+        List<String> commandHistory = userDao.getCommandHistory(user);
+        this.commandHistory.addAll(commandHistory);
 
         String welcomeText = welcomeTextProvider.getWelcomeText().replace("${user}", user);
         send(welcomeText + "\r\n");
@@ -218,7 +224,7 @@ class EHomeShell implements Command
                 }
                 else
                 {
-                    LOG.info("Unhandled character received: {}", character);
+                    LOG.trace("Unhandled character received: {}", character);
                     state.setCancelledHistoryCycling(false);
                 }
 
@@ -254,6 +260,7 @@ class EHomeShell implements Command
             commandHistory.remove(commandHistory.size() - 1);
         }
         commandHistory.add(0, command);
+        userDao.addCommand(user, command);
     }
 
     private boolean isPreviousCharacterWhitespace()
