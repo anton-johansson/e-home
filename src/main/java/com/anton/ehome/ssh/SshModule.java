@@ -15,8 +15,11 @@
  */
 package com.anton.ehome.ssh;
 
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+
 import org.apache.sshd.server.Command;
 
+import com.anton.ehome.common.IDaemon;
 import com.anton.ehome.ssh.cmd.CommandModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
@@ -29,9 +32,9 @@ public class SshModule extends AbstractModule
     @Override
     protected void configure()
     {
-        bind(IDaemon.class).to(SshDaemon.class).in(Singleton.class);
         bind(WelcomeTextProvider.class).in(Singleton.class);
         bind(Command.class).to(EHomeShell.class);
+        newSetBinder(binder(), IDaemon.class).addBinding().to(SshDaemon.class);
 
         install(new CommandModule());
     }

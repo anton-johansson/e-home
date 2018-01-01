@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
-
-import java.io.IOException;
+package com.anton.ehome.common;
 
 /**
- * Defines an executable command.
+ * Provides a common interface for all daemons.
  */
-public interface ICommand
+public interface IDaemon
 {
     /**
-     * Executes the command.
+     * Starts this daemon.
      *
-     * @param communicator Communicates with the client over SSH.
+     * @return Returns whether or not the daemon could be started.
      */
-    void execute(ICommunicator communicator) throws IOException;
+    boolean start();
+
+    /**
+     * Stops this daemon.
+     */
+    void stop();
 }

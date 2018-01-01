@@ -26,6 +26,7 @@ import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.common.IDaemon;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 

@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh;
+package com.anton.ehome.zwave;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
+
+import com.anton.ehome.common.IDaemon;
+import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 
 /**
- * Provides a common interface for all daemons.
+ * Contains IOC bindings for the Z-Wave module.
  */
-public interface IDaemon
+public class ZWaveModule extends AbstractModule
 {
-    /**
-     * Starts this daemon.
-     *
-     * @return Returns whether or not the daemon could be started.
-     */
-    boolean start();
-
-    /**
-     * Stops this daemon.
-     */
-    void stop();
+    @Override
+    protected void configure()
+    {
+        bind(ZWaveDaemon.class).in(Singleton.class);
+        bind(IZWaveManager.class).to(ZWaveDaemon.class);
+        newSetBinder(binder(), IDaemon.class).addBinding().to(ZWaveDaemon.class);
+    }
 }

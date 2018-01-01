@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.anton.ehome.ssh.cmd.annotation.Command;
+import com.anton.ehome.ssh.cmd.common.CommandMetaData;
+import com.anton.ehome.ssh.cmd.common.ICommand;
+import com.anton.ehome.ssh.cmd.common.ICommunicator;
 import com.google.inject.Inject;
 
 /**

@@ -15,10 +15,13 @@
  */
 package com.anton.ehome.conf;
 
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+
+import java.util.List;
 
 /**
  * Holds configuration for the application.
@@ -26,7 +29,7 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 public class Config
 {
     private String identifier = "";
-    private int test;
+    private List<ZWaveConfig> zwaveConfigs = emptyList();
 
     public String getIdentifier()
     {
@@ -38,14 +41,14 @@ public class Config
         this.identifier = identifier;
     }
 
-    public int getTest()
+    public List<ZWaveConfig> getZwaveConfigs()
     {
-        return test;
+        return zwaveConfigs;
     }
 
-    public void setTest(int test)
+    public void setZwaveConfigs(List<ZWaveConfig> zwaveConfigs)
     {
-        this.test = test;
+        this.zwaveConfigs = zwaveConfigs;
     }
 
     @Override

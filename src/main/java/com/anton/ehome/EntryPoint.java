@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.anton.ehome.conf.ConfigModule;
 import com.anton.ehome.dao.DaoModule;
 import com.anton.ehome.ssh.SshModule;
+import com.anton.ehome.zwave.ZWaveModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -65,6 +66,7 @@ public class EntryPoint
         return asList(
                 new ConfigModule(),
                 new DaoModule(),
-                new SshModule());
+                new SshModule(),
+                new ZWaveModule());
     }
 }

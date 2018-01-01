@@ -23,6 +23,8 @@ import org.apache.sshd.server.SshServer;
 
 import com.anton.ehome.ssh.cmd.annotation.Command;
 import com.anton.ehome.ssh.cmd.annotation.Option;
+import com.anton.ehome.ssh.cmd.common.ICommand;
+import com.anton.ehome.ssh.cmd.common.ICommunicator;
 
 /**
  * A command that shows the current version of the E-Home server application.

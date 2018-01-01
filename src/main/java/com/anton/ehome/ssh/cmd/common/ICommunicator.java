@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
+package com.anton.ehome.ssh.cmd.common;
 
 import java.io.IOException;
 
-import com.anton.ehome.ssh.cmd.annotation.Command;
-import com.anton.ehome.ssh.cmd.common.ICommand;
-import com.anton.ehome.ssh.cmd.common.ICommunicator;
-import com.anton.ehome.ssh.cmd.execption.DisconnectException;
-
 /**
- * A command that disconnects the client from the SSH server.
+ * Communicates with the client over SSH.
  */
-@Command(name = "disconnect", description = "Disconnects from the SSH server session")
-class DisconnectCommand implements ICommand
+public interface ICommunicator
 {
-    @Override
-    public void execute(ICommunicator communicator) throws IOException
-    {
-        communicator.newLine().write("Good-bye!").newLine();
-        throw new DisconnectException();
-    }
+    /**
+     * Writes data to the client.
+     *
+     * @param output The data to write.
+     * @return Returns the communicator itself, used for chaining.
+     */
+    ICommunicator write(String output) throws IOException;
+
+    /**
+     * Writes a newline to the client.
+     *
+     * @return Returns the communicator itself, used for chaining.
+     */
+    ICommunicator newLine() throws IOException;
 }

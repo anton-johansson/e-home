@@ -13,27 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
-
-import java.io.IOException;
+package com.anton.ehome.conf;
 
 /**
- * Communicates with the client over SSH.
+ * Defines a Z-Wave configuration.
  */
-public interface ICommunicator
+public class ZWaveConfig
 {
-    /**
-     * Writes data to the client.
-     *
-     * @param output The data to write.
-     * @return Returns the communicator itself, used for chaining.
-     */
-    ICommunicator write(String output) throws IOException;
+    private String name = "";
+    private String serialPort = "";
 
-    /**
-     * Writes a newline to the client.
-     *
-     * @return Returns the communicator itself, used for chaining.
-     */
-    ICommunicator newLine() throws IOException;
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getSerialPort()
+    {
+        return serialPort;
+    }
+
+    public void setSerialPort(String serialPort)
+    {
+        this.serialPort = serialPort;
+    }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
+package com.anton.ehome.ssh.cmd.common;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 

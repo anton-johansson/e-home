@@ -43,10 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.dao.IUserDao;
-import com.anton.ehome.ssh.cmd.CommandMetaData;
-import com.anton.ehome.ssh.cmd.CommandOptionMetaData;
-import com.anton.ehome.ssh.cmd.ICommand;
-import com.anton.ehome.ssh.cmd.ICommunicator;
+import com.anton.ehome.ssh.cmd.common.CommandMetaData;
+import com.anton.ehome.ssh.cmd.common.CommandOptionMetaData;
+import com.anton.ehome.ssh.cmd.common.ICommand;
+import com.anton.ehome.ssh.cmd.common.ICommunicator;
 import com.anton.ehome.ssh.cmd.execption.DisconnectException;
 import com.anton.ehome.ssh.cmd.execption.UnknownOptionException;
 import com.google.inject.Inject;
@@ -573,7 +573,7 @@ class EHomeShell implements Command
         {
             command += "[]";
         }
-        LOG.info("Current command: {}", command);
+        LOG.trace("Current command: {}", command);
     }
 
     private void send(String output) throws IOException

@@ -15,11 +15,13 @@
  */
 package com.anton.ehome;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.anton.ehome.conf.Config;
-import com.anton.ehome.ssh.IDaemon;
+import com.anton.ehome.common.IDaemon;
 import com.google.inject.Inject;
 
 /**
@@ -29,39 +31,46 @@ class Daemon
 {
     private static final Logger LOG = LoggerFactory.getLogger(Daemon.class);
 
-    private final Config config;
-    private final IDaemon ssh;
+    private final Set<IDaemon> daemons;
 
     @Inject
-    Daemon(Config config, IDaemon ssh)
+    Daemon(Set<IDaemon> daemons)
     {
-        this.config = config;
-        this.ssh = ssh;
+        this.daemons = daemons;
     }
 
     /**
-     * Starts the daemon.
+     * Starts the daemons.
      */
     void start()
     {
+        Set<IDaemon> startedDaemons = new HashSet<>();
+
         LOG.info("Starting daemons...");
-        if (ssh.start())
+        for (IDaemon daemon : daemons)
         {
-            LOG.info("Daemons successfully started!");
+            if (daemon.start())
+            {
+                LOG.info("Successfully started daemon: {}", daemon.getClass().getName());
+                startedDaemons.add(daemon);
+            }
+            else
+            {
+                LOG.warn("Could not start daemon: {}", daemon.getClass().getName());
+                startedDaemons.forEach(IDaemon::stop);
+                return;
+            }
         }
-        else
-        {
-            LOG.warn("Could not start all daemons");
-        }
+        LOG.info("All daemons started");
     }
 
     /**
-     * Stops the daemon.
+     * Stops the daemons.
      */
     void stop()
     {
         LOG.info("Stopping daemons...");
-        ssh.stop();
-        LOG.info("Daemons successfully stopped");
+        daemons.forEach(IDaemon::stop);
+        LOG.info("All daemons successfully stopped");
     }
 }

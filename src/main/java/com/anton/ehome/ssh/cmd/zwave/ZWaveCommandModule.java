@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
+package com.anton.ehome.ssh.cmd.zwave;
 
-import java.io.IOException;
+import static java.util.Arrays.asList;
 
-import com.anton.ehome.ssh.cmd.annotation.Command;
+import java.util.List;
+
+import com.anton.ehome.ssh.cmd.common.AbstractCommandModule;
 import com.anton.ehome.ssh.cmd.common.ICommand;
-import com.anton.ehome.ssh.cmd.common.ICommunicator;
-import com.anton.ehome.ssh.cmd.execption.DisconnectException;
 
 /**
- * A command that disconnects the client from the SSH server.
+ * Contains IOC bindings for the Z-Wave command module.
  */
-@Command(name = "disconnect", description = "Disconnects from the SSH server session")
-class DisconnectCommand implements ICommand
+public class ZWaveCommandModule extends AbstractCommandModule
 {
     @Override
-    public void execute(ICommunicator communicator) throws IOException
+    protected List<Class<? extends ICommand>> getCommandClasses()
     {
-        communicator.newLine().write("Good-bye!").newLine();
-        throw new DisconnectException();
+        return asList(ShowControllersCommand.class);
     }
 }
