@@ -23,16 +23,6 @@ import com.google.gson.GsonBuilder;
  */
 public class JsonUtils
 {
-    // CSOFF
-    public static void main(String[] args)
-    {
-        System.out.println(0x21 & 0x1F); // type
-        System.out.println((0x34 >> 3) & 0x03); // scale
-        System.out.println((0x34 >> 5) & 0x07); // precision
-        System.out.println(0x34 & 0x07); // size
-    }
-    // CSON
-
     /** The standard JSON mapper. No pretty printing. */
     public static final Gson JSON_MAPPER = new GsonBuilder().create();
 }
