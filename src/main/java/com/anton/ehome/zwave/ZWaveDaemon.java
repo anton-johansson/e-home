@@ -92,4 +92,14 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
     {
         return unmodifiableList(controllers);
     }
+
+    @Override
+    public void addController(String name, String serialPort)
+    {
+        addSerialPortToRXTX(serialPort);
+
+        Controller controller = new Controller(name, serialPort);
+        controller.start();
+        controllers.add(controller);
+    }
 }

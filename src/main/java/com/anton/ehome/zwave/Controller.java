@@ -15,6 +15,8 @@
  */
 package com.anton.ehome.zwave;
 
+import static com.anton.ehome.utils.Assert.requireNonBlank;
+
 import java.io.File;
 
 import org.slf4j.Logger;
@@ -39,10 +41,11 @@ class Controller implements IZWaveController
 
     Controller(String name, String serialPort)
     {
-        this.name = name;
-        this.serialPort = serialPort;
+        this.name = requireNonBlank(name, "name can't be blank");
+        this.serialPort = requireNonBlank(serialPort, "serialPort can't be blank");
     }
 
+    @Override
     public String getName()
     {
         return name;
@@ -61,7 +64,10 @@ class Controller implements IZWaveController
     {
         LOG.info("Starting Z-Wave controller '{}'", name);
 
-        controller = new NettyZWaveController(serialPort, new File("/home/anton/Documents/z-wave/stores/" + name));
+        File dataDirectory = new File("/home/anton/Documents/z-wave/stores/" + name);
+        dataDirectory.mkdirs();
+
+        controller = new NettyZWaveController(serialPort, dataDirectory);
         controller.setListener(new Listener());
         controller.start();
     }

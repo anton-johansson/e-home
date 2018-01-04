@@ -13,27 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.zwave;
+package com.anton.ehome.utils;
 
-import java.util.List;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * Manages the configured Z-Wave controllers.
+ * Provides ways of asserting statements.
  */
-public interface IZWaveManager
+public final class Assert
 {
-    /**
-     * Gets all configured {@link IZWaveController controllers}.
-     *
-     * @return Returns the controllers.
-     */
-    List<? extends IZWaveController> getControllers();
+    // Prevent instantiation
+    private Assert()
+    {
+    }
 
     /**
-     * Adds a controller to the list of {@link IZWaveController controllers}.
+     * Asserts that the given value isn't blank.
      *
-     * @param name The name of the controller.
-     * @param serialPort The serial port to use.
+     * @param value The value to assert.
+     * @param name The name of the value.
+     * @return Returns the given value.
      */
-    void addController(String name, String serialPort);
+    public static String requireNonBlank(String value, String name)
+    {
+        if (isBlank(value))
+        {
+            throw new IllegalArgumentException(name + " can't be blank");
+        }
+        return value;
+    }
 }

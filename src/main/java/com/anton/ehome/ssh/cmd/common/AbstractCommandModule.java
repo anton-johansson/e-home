@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.anton.ehome.ssh.cmd.annotation.Argument;
 import com.anton.ehome.ssh.cmd.annotation.Command;
 import com.anton.ehome.ssh.cmd.annotation.Option;
 import com.google.inject.AbstractModule;
@@ -61,8 +62,31 @@ public abstract class AbstractCommandModule extends AbstractModule
                 .map(field -> getMetaDataForOption(field))
                 .collect(toList());
 
-        CommandMetaData metaData = new CommandMetaData(command, constructor, options);
+        Field argumentField = getArgumentField(commandClass);
+        Function<String, Object> argumentConverter = argumentField == null ? null : getConverter(argumentField);
+
+        CommandMetaData metaData = new CommandMetaData(command, constructor, options, argumentField, argumentConverter);
         newMapBinder(binder(), String.class, CommandMetaData.class).addBinding(metaData.getCommandKey()).toInstance(metaData);
+    }
+
+    private Field getArgumentField(Class<?> commandClass)
+    {
+        List<Field> arguments = Stream.of(commandClass.getDeclaredFields())
+                .filter(field -> field.getAnnotation(Argument.class) != null)
+                .collect(toList());
+
+        if (arguments.isEmpty())
+        {
+            return null;
+        }
+        else if (arguments.size() > 1)
+        {
+            throw new RuntimeException("Commands can only have one argument");
+        }
+        else
+        {
+            return arguments.get(0);
+        }
     }
 
     private CommandOptionMetaData getMetaDataForOption(Field field)
@@ -85,15 +109,15 @@ public abstract class AbstractCommandModule extends AbstractModule
         Class<?> type = getActualType(field);
         if (boolean.class.equals(type))
         {
-            if (option.acceptsValue())
-            {
-                throw new RuntimeException("Boolean options cannot accept values");
-            }
             if (!Option.UNSPECIFIED.equals(option.defaultValue()))
             {
                 throw new RuntimeException("Boolean options cannot have default values");
             }
             return input -> "true".equals(input);
+        }
+        else if (String.class.equals(type))
+        {
+            return input -> input;
         }
         else
         {

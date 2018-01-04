@@ -39,7 +39,7 @@ public class CommandOptionMetaData
         this.field = field;
         this.name = option.name();
         this.description = option.description();
-        this.acceptsValue = option.acceptsValue();
+        this.acceptsValue = !boolean.class.equals(field.getType());
         this.defaultValue = option.defaultValue();
         this.multiple = multiple;
         this.converter = converter;
@@ -78,5 +78,10 @@ public class CommandOptionMetaData
     public Function<String, Object> getConverter()
     {
         return converter;
+    }
+
+    public boolean isDefaultValueSpecified()
+    {
+        return !Option.UNSPECIFIED.equals(defaultValue);
     }
 }

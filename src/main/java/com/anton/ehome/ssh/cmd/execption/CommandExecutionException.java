@@ -13,25 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd.zwave;
-
-import static java.util.Arrays.asList;
-
-import java.util.List;
-
-import com.anton.ehome.ssh.cmd.common.AbstractCommandModule;
-import com.anton.ehome.ssh.cmd.common.ICommand;
+package com.anton.ehome.ssh.cmd.execption;
 
 /**
- * Contains IOC bindings for the Z-Wave command module.
+ * Defines an exception that is thrown when a command fails.
  */
-public class ZWaveCommandModule extends AbstractCommandModule
+public class CommandExecutionException extends Exception
 {
-    @Override
-    protected List<Class<? extends ICommand>> getCommandClasses()
+    public CommandExecutionException(String message)
     {
-        return asList(
-                AddControllerCommand.class,
-                ShowControllersCommand.class);
+        super(message);
     }
 }

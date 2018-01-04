@@ -28,10 +28,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.sshd.common.SshException;
@@ -47,6 +50,7 @@ import com.anton.ehome.ssh.cmd.common.CommandMetaData;
 import com.anton.ehome.ssh.cmd.common.CommandOptionMetaData;
 import com.anton.ehome.ssh.cmd.common.ICommand;
 import com.anton.ehome.ssh.cmd.common.ICommunicator;
+import com.anton.ehome.ssh.cmd.execption.CommandExecutionException;
 import com.anton.ehome.ssh.cmd.execption.DisconnectException;
 import com.anton.ehome.ssh.cmd.execption.UnknownOptionException;
 import com.google.inject.Inject;
@@ -302,16 +306,24 @@ class EHomeShell implements Command
                 LOG.info("Command requested disconnect");
                 exitCallback.onExit(0);
             }
+            catch (CommandExecutionException e)
+            {
+                LOG.debug("Command failed with message: {}", e.getMessage());
+                send("\r\ncommand failed: " + e.getMessage());
+            }
             catch (Exception e)
             {
                 LOG.error("Unhandled exception occurred while executing the command", e);
-                send("\r\nUnknown error occurred: " + e.getMessage());
+                send("\r\nexception: " + e.getMessage());
             }
         }
     }
 
-    private void parseOptionsAndArguments(StringTokenizer tokenizer, ICommand command, CommandMetaData metaData) throws UnknownOptionException
+    private void parseOptionsAndArguments(StringTokenizer tokenizer, ICommand command, CommandMetaData metaData) throws UnknownOptionException, CommandExecutionException
     {
+        Set<Field> usedFields = new HashSet<>();
+
+        boolean hasWrittenArgument = false;
         while (tokenizer.hasMoreTokens())
         {
             String token = tokenizer.nextToken();
@@ -324,20 +336,55 @@ class EHomeShell implements Command
                         .findAny()
                         .orElseThrow(() -> new UnknownOptionException(optionName));
 
-                if (optionMetaData.isAcceptsValue())
+                usedFields.add(optionMetaData.getField());
+                processOption(tokenizer, command, token, optionMetaData);
+            }
+            else if (metaData.getArgumentField() != null)
+            {
+                if (hasWrittenArgument)
                 {
-                    throw new UnsupportedOperationException("Options with values are not yet implemented");
+                    throw new CommandExecutionException("Unknown argument: " + token);
                 }
-                else
-                {
-                    Object value = optionMetaData.getConverter().apply("true");
-                    writeField(optionMetaData.getField(), command, value);
-                }
+                Object value = metaData.getArgumentConverter().apply(token);
+                writeField(metaData.getArgumentField(), command, value);
+                hasWrittenArgument = true;
             }
             else
             {
                 throw new UnsupportedOperationException("Arguments are not yet implemented");
             }
+        }
+
+        for (CommandOptionMetaData commandMeta : metaData.getOptions())
+        {
+            if (!usedFields.contains(commandMeta.getField()) && commandMeta.isDefaultValueSpecified())
+            {
+                String defaultValue = commandMeta.getDefaultValue();
+                Object value = commandMeta.getConverter().apply(defaultValue);
+                writeField(commandMeta.getField(), command, value);
+            }
+        }
+    }
+
+    private void processOption(StringTokenizer tokenizer, ICommand command, String token, CommandOptionMetaData optionMetaData) throws CommandExecutionException
+    {
+        if (optionMetaData.isAcceptsValue())
+        {
+            if (!tokenizer.hasMoreTokens())
+            {
+                throw new CommandExecutionException("Expected a value for option " + token);
+            }
+            else
+            {
+                String valueToken = tokenizer.nextToken();
+                Object value = optionMetaData.getConverter().apply(valueToken);
+                writeField(optionMetaData.getField(), command, value);
+            }
+        }
+        else
+        {
+            Object value = optionMetaData.getConverter().apply("true");
+            writeField(optionMetaData.getField(), command, value);
         }
     }
 

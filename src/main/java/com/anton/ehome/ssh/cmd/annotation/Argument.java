@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd.zwave;
+package com.anton.ehome.ssh.cmd.annotation;
 
-import static java.util.Arrays.asList;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.util.List;
-
-import com.anton.ehome.ssh.cmd.common.AbstractCommandModule;
-import com.anton.ehome.ssh.cmd.common.ICommand;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Contains IOC bindings for the Z-Wave command module.
+ * Defines an argument for a command.
  */
-public class ZWaveCommandModule extends AbstractCommandModule
+@Target(FIELD)
+@Retention(RUNTIME)
+public @interface Argument
 {
-    @Override
-    protected List<Class<? extends ICommand>> getCommandClasses()
-    {
-        return asList(
-                AddControllerCommand.class,
-                ShowControllersCommand.class);
-    }
+    /**
+     * The description of the argument.
+     */
+    String description();
 }

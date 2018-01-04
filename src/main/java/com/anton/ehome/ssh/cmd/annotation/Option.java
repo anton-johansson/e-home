@@ -42,11 +42,6 @@ public @interface Option
     String description();
 
     /**
-     * Whether or not this option accepts a value.
-     */
-    boolean acceptsValue() default false;
-
-    /**
      * The default value to use if this option is omitted from the command.
      */
     String defaultValue() default UNSPECIFIED;

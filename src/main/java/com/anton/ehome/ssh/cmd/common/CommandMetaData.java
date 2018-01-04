@@ -17,7 +17,9 @@ package com.anton.ehome.ssh.cmd.common;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.anton.ehome.ssh.cmd.annotation.Command;
@@ -32,14 +34,18 @@ public class CommandMetaData
     private final String description;
     private final Supplier<ICommand> constructor;
     private final List<CommandOptionMetaData> options;
+    private final Field argumentField;
+    private final Function<String, Object> argumentConverter;
 
-    CommandMetaData(Command command, Supplier<ICommand> constructor, List<CommandOptionMetaData> options)
+    CommandMetaData(Command command, Supplier<ICommand> constructor, List<CommandOptionMetaData> options, Field argumentField, Function<String, Object> argumentConverter)
     {
         this.options = options;
         this.group = command.group();
         this.name = command.name();
         this.description = command.description();
         this.constructor = constructor;
+        this.argumentField = argumentField;
+        this.argumentConverter = argumentConverter;
     }
 
     public String getGroup()
@@ -65,6 +71,16 @@ public class CommandMetaData
     public List<CommandOptionMetaData> getOptions()
     {
         return options;
+    }
+
+    public Field getArgumentField()
+    {
+        return argumentField;
+    }
+
+    public Function<String, Object> getArgumentConverter()
+    {
+        return argumentConverter;
     }
 
     /**

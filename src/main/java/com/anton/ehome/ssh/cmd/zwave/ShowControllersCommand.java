@@ -30,7 +30,7 @@ import com.google.inject.Inject;
 /**
  * Lists all the configured Z-Wave controllers.
  */
-@Command(group = "zwave", name = "controllers", description = "Lists all configured Z-Wave controllers")
+@Command(group = "z-wave", name = "controllers", description = "Lists all configured Z-Wave controllers")
 class ShowControllersCommand implements ICommand
 {
     private final IZWaveManager manager;
