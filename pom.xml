@@ -168,28 +168,14 @@
             <version>4.0.21.Final</version>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-rxtx</artifactId>
-            <version>4.0.21.Final</version>
+            <groupId>se.koc</groupId>
+            <artifactId>netty-transport-jserialcomm</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.mapdb</groupId>
             <artifactId>mapdb</artifactId>
             <version>1.0.7</version>
-        </dependency>
-        <!-- 
-        <dependency>
-            <groupId>org.rxtx</groupId>
-            <artifactId>rxtx</artifactId>
-            <version>2.1.7</version>
-        </dependency>
-         -->
-        <dependency>
-            <groupId>RXTX</groupId>
-            <artifactId>RXTXcomm</artifactId>
-            <version>2.2pre2</version>
-            <systemPath>/usr/share/java/RXTXcomm.jar</systemPath>
-            <scope>system</scope>
         </dependency>
 
         <!-- Test dependencies -->
