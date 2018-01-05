@@ -15,6 +15,9 @@
  */
 package com.anton.ehome.zwave;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 /**
  * Defines a single Z-Wave controller.
  */
@@ -33,4 +36,18 @@ public interface IZWaveController
      * @return Returns the serial port.
      */
     String getSerialPort();
+
+    /**
+     * Gets the devices connected to this controller.
+     *
+     * @return Returns the conneted devices.
+     */
+    List<Device> getDevices();
+
+    /**
+     * Adds a listener for when devices are added to the controller.
+     *
+     * @param listener The listener to add.
+     */
+    void onDeviceAdded(Consumer<Device> listener);
 }

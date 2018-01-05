@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd.zwave;
+package com.anton.ehome.utils;
 
-import static java.util.Arrays.asList;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import java.util.List;
-
-import com.anton.ehome.ssh.cmd.common.AbstractCommandModule;
-import com.anton.ehome.ssh.cmd.common.ICommand;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Contains IOC bindings for the Z-Wave command module.
+ * Indicates that a member is visible for testing purposes only.
  */
-public class ZWaveCommandModule extends AbstractCommandModule
+@Target(METHOD)
+@Retention(SOURCE)
+public @interface VisibleForTesting
 {
-    @Override
-    protected List<Class<? extends ICommand>> getCommandClasses()
-    {
-        return asList(
-                AddControllerCommand.class,
-                ShowDevicesCommand.class,
-                ShowControllersCommand.class);
-    }
 }

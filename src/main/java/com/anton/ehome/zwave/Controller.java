@@ -16,17 +16,23 @@
 package com.anton.ehome.zwave;
 
 import static com.anton.ehome.utils.Assert.requireNonBlank;
+import static java.util.Collections.unmodifiableList;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.whizzosoftware.wzwave.commandclass.ManufacturerSpecificCommandClass;
 import com.whizzosoftware.wzwave.controller.ZWaveController;
 import com.whizzosoftware.wzwave.controller.ZWaveControllerListener;
 import com.whizzosoftware.wzwave.controller.netty.NettyZWaveController;
 import com.whizzosoftware.wzwave.node.NodeInfo;
 import com.whizzosoftware.wzwave.node.ZWaveEndpoint;
+import com.whizzosoftware.wzwave.node.specific.PCController;
 
 /**
  * Default implementation of {@link IZWaveController}.
@@ -35,6 +41,8 @@ class Controller implements IZWaveController
 {
     private static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
+    private final List<Device> devices = new ArrayList<>();
+    private final List<Consumer<Device>> deviceAddedListeners = new ArrayList<>();
     private final String name;
     private final String serialPort;
     private ZWaveController controller;
@@ -55,6 +63,18 @@ class Controller implements IZWaveController
     public String getSerialPort()
     {
         return serialPort;
+    }
+
+    @Override
+    public List<Device> getDevices()
+    {
+        return unmodifiableList(devices);
+    }
+
+    @Override
+    public void onDeviceAdded(Consumer<Device> listener)
+    {
+        deviceAddedListeners.add(listener);
     }
 
     /**
@@ -92,6 +112,24 @@ class Controller implements IZWaveController
         public void onZWaveNodeAdded(ZWaveEndpoint node)
         {
             LOG.trace("#onZWaveNodeAdded: {}", node);
+
+            Device device = new Device(node.getNodeId(), getDeviceType(node));
+            devices.add(device);
+            deviceAddedListeners.forEach(listener -> listener.accept(device));
+        }
+
+        private String getDeviceType(ZWaveEndpoint node)
+        {
+            ManufacturerSpecificCommandClass commandClass = (ManufacturerSpecificCommandClass) node.getCommandClass(ManufacturerSpecificCommandClass.ID);
+            if (commandClass != null)
+            {
+                return commandClass.getProductInfo().getManufacturer() + " " + commandClass.getProductInfo().getName();
+            }
+            if (PCController.class.equals(node.getClass()))
+            {
+                return "Controller";
+            }
+            return "Unknown";
         }
 
         @Override

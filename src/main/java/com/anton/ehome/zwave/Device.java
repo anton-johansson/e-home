@@ -13,26 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd.zwave;
-
-import static java.util.Arrays.asList;
-
-import java.util.List;
-
-import com.anton.ehome.ssh.cmd.common.AbstractCommandModule;
-import com.anton.ehome.ssh.cmd.common.ICommand;
+package com.anton.ehome.zwave;
 
 /**
- * Contains IOC bindings for the Z-Wave command module.
+ * Defines a single Z-Wave device.
  */
-public class ZWaveCommandModule extends AbstractCommandModule
+public class Device
 {
-    @Override
-    protected List<Class<? extends ICommand>> getCommandClasses()
+    private final byte nodeId;
+    private final String deviceType;
+
+    public Device(byte nodeId, String deviceType)
     {
-        return asList(
-                AddControllerCommand.class,
-                ShowDevicesCommand.class,
-                ShowControllersCommand.class);
+        this.nodeId = nodeId;
+        this.deviceType = deviceType;
+    }
+
+    public byte getNodeId()
+    {
+        return nodeId;
+    }
+
+    public String getDeviceType()
+    {
+        return deviceType;
     }
 }
