@@ -64,7 +64,7 @@ public class ShowControllersCommandTest extends Assert
     @Test
     public void testExecutingCommand() throws IOException
     {
-        command.execute(communicator);
+        command.execute(null, communicator);
 
         InOrder inOrder = inOrder(communicator);
         inOrder.verify(communicator).newLine();

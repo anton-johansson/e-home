@@ -76,7 +76,7 @@ public class ShowDevicesCommandTest extends Assert
     @Test
     public void testExecutingCommand() throws IOException, CommandExecutionException
     {
-        command.execute(communicator);
+        command.execute(null, communicator);
 
         InOrder inOrder = inOrder(communicator);
         inOrder.verify(communicator).newLine();
@@ -98,7 +98,7 @@ public class ShowDevicesCommandTest extends Assert
     public void testExecutingCommandFilteredByController() throws IOException, CommandExecutionException
     {
         command.setControllerName("test");
-        command.execute(communicator);
+        command.execute(null, communicator);
 
         InOrder inOrder = inOrder(communicator);
         inOrder.verify(communicator).newLine();

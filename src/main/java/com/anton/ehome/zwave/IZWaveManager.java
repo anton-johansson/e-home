@@ -36,4 +36,11 @@ public interface IZWaveManager
      * @param serialPort The serial port to use.
      */
     void addController(String name, String serialPort);
+
+    /**
+     * Removes a controller from the list of {@link IZWaveController controllers}.
+     *
+     * @param name The name of the controller to remove.
+     */
+    void removeController(String name);
 }

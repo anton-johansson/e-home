@@ -38,7 +38,7 @@ class VersionCommand implements ICommand
     private boolean verbose;
 
     @Override
-    public void execute(ICommunicator communicator) throws IOException
+    public void execute(String user, ICommunicator communicator) throws IOException
     {
         if (verbose)
         {

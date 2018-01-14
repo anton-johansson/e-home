@@ -29,7 +29,7 @@ import com.anton.ehome.ssh.cmd.execption.DisconnectException;
 class DisconnectCommand implements ICommand
 {
     @Override
-    public void execute(ICommunicator communicator) throws IOException
+    public void execute(String user, ICommunicator communicator) throws IOException
     {
         communicator.newLine().write("Good-bye!").newLine();
         throw new DisconnectException();

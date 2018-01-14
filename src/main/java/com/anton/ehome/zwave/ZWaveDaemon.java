@@ -15,6 +15,7 @@
  */
 package com.anton.ehome.zwave;
 
+import static com.anton.ehome.utils.Assert.requireNonBlank;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
@@ -25,6 +26,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.common.IDaemon;
 import com.anton.ehome.conf.Config;
@@ -36,6 +39,8 @@ import com.google.inject.Inject;
  */
 class ZWaveDaemon implements IDaemon, IZWaveManager
 {
+    private static final Logger LOG = LoggerFactory.getLogger(ZWaveDaemon.class);
+
     private final List<Controller> controllers = new ArrayList<>();
     private final Config config;
 
@@ -101,5 +106,21 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
         Controller controller = new Controller(name, serialPort);
         controller.start();
         controllers.add(controller);
+
+        LOG.info("Successfully added controller");
+    }
+
+    @Override
+    public void removeController(String name)
+    {
+        requireNonBlank(name, "name can't be blank");
+        Controller controller = controllers.stream()
+                .filter(c -> name.equals(c.getName()))
+                .findAny()
+                .get();
+        controller.stop();
+        controllers.remove(controller);
+
+        LOG.info("Successfully removed controller");
     }
 }

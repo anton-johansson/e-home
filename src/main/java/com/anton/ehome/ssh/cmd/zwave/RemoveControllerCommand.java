@@ -15,38 +15,39 @@
  */
 package com.anton.ehome.ssh.cmd.zwave;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import java.io.IOException;
 
 import com.anton.ehome.conf.IConfigService;
 import com.anton.ehome.conf.ZWaveConfig;
 import com.anton.ehome.ssh.cmd.annotation.Argument;
 import com.anton.ehome.ssh.cmd.annotation.Command;
-import com.anton.ehome.ssh.cmd.annotation.Option;
 import com.anton.ehome.ssh.cmd.common.ICommand;
 import com.anton.ehome.ssh.cmd.common.ICommunicator;
 import com.anton.ehome.ssh.cmd.execption.CommandExecutionException;
+import com.anton.ehome.utils.VisibleForTesting;
 import com.anton.ehome.zwave.IZWaveManager;
 import com.google.inject.Inject;
 
 /**
- * A command for adding Z-Wave controllers to the network.
+ * A command for removing controllers from the Z-Wave network.
  */
-@Command(group = "z-wave", name = "add-controller", description = "Adds a new controller to the Z-Wave network")
-class AddControllerCommand implements ICommand
+@Command(group = "z-wave", name = "remove-controller", description = "Removes a controller from the Z-Wave network")
+class RemoveControllerCommand implements ICommand
 {
     private final IZWaveManager manager;
     private final IConfigService configService;
 
-    @Option(name = "name", description = "The name of the controller", defaultValue = "default")
+    @Argument(description = "The name of the controller to remove")
     private String name;
 
-    @Argument(description = "The serial port to use")
-    private String serialPort;
+    @VisibleForTesting
+    void setName(String name)
+    {
+        this.name = name;
+    }
 
     @Inject
-    AddControllerCommand(IZWaveManager manager, IConfigService configService)
+    RemoveControllerCommand(IZWaveManager manager, IConfigService configService)
     {
         this.manager = manager;
         this.configService = configService;
@@ -55,26 +56,19 @@ class AddControllerCommand implements ICommand
     @Override
     public void execute(String user, ICommunicator communicator) throws IOException, CommandExecutionException
     {
-        if (isBlank(serialPort))
-        {
-            throw new CommandExecutionException("You must provide a serial port");
-        }
+        ZWaveConfig zWaveConfig = configService.getCurrentConfig()
+                .getZwaveConfigs()
+                .stream()
+                .filter(config -> name.equals(config.getName()))
+                .findAny()
+                .orElseThrow(() -> new CommandExecutionException("No controller named '" + name + "' could be found"));
 
-        if (manager.getControllers().stream().anyMatch(controller -> controller.getName().equals(name)))
+        manager.removeController(zWaveConfig.getName());
+        configService.modify("Removed Z-Wave controller", user, config ->
         {
-            throw new CommandExecutionException("The name '" + name + "' is already used by another controller");
-        }
-
-        manager.addController(name, serialPort);
-        configService.modify("Added Z-Wave controller", user, config ->
-        {
-            ZWaveConfig zWaveConfig = new ZWaveConfig();
-            zWaveConfig.setName(name);
-            zWaveConfig.setSerialPort(serialPort);
-
-            config.getZwaveConfigs().add(zWaveConfig);
+            config.getZwaveConfigs().remove(zWaveConfig);
         });
 
-        communicator.newLine().write("Controller added successfully");
+        communicator.newLine().write("Controller removed successfully");
     }
 }

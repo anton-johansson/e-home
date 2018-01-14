@@ -293,7 +293,7 @@ class EHomeShell implements Command
             try
             {
                 parseOptionsAndArguments(tokenizer, command, metaData);
-                command.execute(communicator);
+                command.execute(user, communicator);
                 lastCommandSuccess = true;
             }
             catch (UnknownOptionException e)

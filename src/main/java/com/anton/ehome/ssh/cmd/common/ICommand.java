@@ -27,7 +27,8 @@ public interface ICommand
     /**
      * Executes the command.
      *
+     * @param user The user that executes the command.
      * @param communicator Communicates with the client over SSH.
      */
-    void execute(ICommunicator communicator) throws IOException, CommandExecutionException;
+    void execute(String user, ICommunicator communicator) throws IOException, CommandExecutionException;
 }

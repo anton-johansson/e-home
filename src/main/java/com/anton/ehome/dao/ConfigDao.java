@@ -47,8 +47,19 @@ class ConfigDao extends AbstractDao implements IConfigDao
     {
         ConfigData result = getOrCreateCurrentConfig();
         Config config = JSON_MAPPER.fromJson(result.data, Config.class);
-        config.setIdentifier(result.sha);
         return config;
+    }
+
+    @Override
+    public void persist(String reason, String user, Config config)
+    {
+        String data = JSON_MAPPER.toJson(config);
+        insert().measurement("config")
+                .field("sha", time -> generateSha(time, data), true)
+                .field("reason", reason)
+                .field("user", user, true)
+                .field("data", data)
+                .execute();
     }
 
     private ConfigData getOrCreateCurrentConfig()

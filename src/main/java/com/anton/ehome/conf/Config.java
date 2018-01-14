@@ -28,18 +28,7 @@ import java.util.List;
  */
 public class Config
 {
-    private String identifier = "";
     private List<ZWaveConfig> zwaveConfigs = emptyList();
-
-    public String getIdentifier()
-    {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier)
-    {
-        this.identifier = identifier;
-    }
 
     public List<ZWaveConfig> getZwaveConfigs()
     {

@@ -42,7 +42,7 @@ class ShowControllersCommand implements ICommand
     }
 
     @Override
-    public void execute(ICommunicator communicator) throws IOException
+    public void execute(String user, ICommunicator communicator) throws IOException
     {
         List<? extends IZWaveController> controllers = manager.getControllers();
         int lengthOfLongestName = controllers.stream()

@@ -45,7 +45,7 @@ class HelpCommand implements ICommand
     }
 
     @Override
-    public void execute(ICommunicator communicator) throws IOException
+    public void execute(String user, ICommunicator communicator) throws IOException
     {
         List<String> commandKeys = new ArrayList<>(commands.keySet());
         Collections.sort(commandKeys);

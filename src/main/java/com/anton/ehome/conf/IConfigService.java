@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.dao;
+package com.anton.ehome.conf;
 
-import com.anton.ehome.conf.Config;
+import java.util.function.Consumer;
 
 /**
- * Provides persistence operations for managing the configuration.
+ * Provides utility for managing the configuration.
  */
-public interface IConfigDao
+public interface IConfigService
 {
+    /**
+     * Modifies the configuration.
+     *
+     * @param reason The reason of the modification.
+     * @param user The user that modified the configuration.
+     * @param consumer Consumes the configuration before persisting it to the database.
+     */
+    void modify(String reason, String user, Consumer<Config> consumer);
+
     /**
      * Gets the current configuration.
      *
-     * @return Returns the current configuration stored in the database.
+     * @return Returns the current configuration.
      */
     Config getCurrentConfig();
-
-    /**
-     * Persists the given configuration as the current one.
-     *
-     * @param reason The reason of the change.
-     * @param user The user that made the change.
-     * @param config The changed configuration.
-     */
-    void persist(String reason, String user, Config config);
 }

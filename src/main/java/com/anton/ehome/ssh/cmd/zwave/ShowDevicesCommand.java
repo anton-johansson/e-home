@@ -60,7 +60,7 @@ class ShowDevicesCommand implements ICommand
     }
 
     @Override
-    public void execute(ICommunicator communicator) throws IOException, CommandExecutionException
+    public void execute(String user, ICommunicator communicator) throws IOException, CommandExecutionException
     {
         List<DeviceInfo> devices = manager.getControllers()
                 .stream()
