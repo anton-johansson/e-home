@@ -9,8 +9,6 @@ An E-Home controller server.
 
 ## Prerequisites
 
- * The application requires the [RXTX](http://rxtx.qbang.org) native library to run. This can be installed on a Debian-based system using `sudo apt install librxtx-java`. Hopefully this dependency will be replaced with [jSerialComm](http://fazecast.github.io/jSerialComm) which does not require separately installed natives. See [this issue](https://github.com/whizzosoftware/WZWave/issues/11) for more information.
-
  * It requires an [InfluxDB](https://www.influxdata.com) instance running. Use the following to run it as a Docker container:
 
 ```sh
