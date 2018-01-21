@@ -31,7 +31,9 @@ import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.common.IDaemon;
 import com.anton.ehome.conf.Config;
+import com.anton.ehome.conf.IConfigService;
 import com.anton.ehome.conf.ZWaveConfig;
+import com.anton.ehome.dao.IMetricsDao;
 import com.google.inject.Inject;
 
 /**
@@ -42,24 +44,27 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
     private static final Logger LOG = LoggerFactory.getLogger(ZWaveDaemon.class);
 
     private final List<Controller> controllers = new ArrayList<>();
-    private final Config config;
+    private final IConfigService configService;
+    private final IMetricsDao metricsDao;
 
     @Inject
-    ZWaveDaemon(Config config)
+    ZWaveDaemon(IConfigService configService, IMetricsDao metricsDao)
     {
-        this.config = config;
+        this.configService = configService;
+        this.metricsDao = metricsDao;
     }
 
     @Override
     public boolean start()
     {
+        Config config = configService.getCurrentConfig();
         for (ZWaveConfig zwave : config.getZwaveConfigs())
         {
             String name = zwave.getName();
             String serialPort = zwave.getSerialPort();
             addSerialPortToRXTX(serialPort);
 
-            Controller controller = new Controller(name, serialPort);
+            Controller controller = new Controller(metricsDao, name, serialPort);
             controller.start();
             controllers.add(controller);
         }
@@ -103,7 +108,7 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
     {
         addSerialPortToRXTX(serialPort);
 
-        Controller controller = new Controller(name, serialPort);
+        Controller controller = new Controller(metricsDao, name, serialPort);
         controller.start();
         controllers.add(controller);
 

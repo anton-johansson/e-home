@@ -79,10 +79,11 @@ class ShowDevicesCommand implements ICommand
                 .orElse(0);
         lengthOfLongestDeviceType = Integer.max(lengthOfLongestDeviceType, "DEVICE".length());
 
-        communicator.newLine().write(rightPad("DEVICE", lengthOfLongestDeviceType) + "   CONTROLLER");
+        communicator.newLine().write("NODE ID" + "   " + rightPad("DEVICE", lengthOfLongestDeviceType) + "   CONTROLLER");
         for (DeviceInfo device : devices)
         {
-            communicator.newLine().write(rightPad(device.device.getDeviceType(), lengthOfLongestDeviceType) + "   " + device.controllerName);
+            communicator.newLine().write(rightPad(String.valueOf(device.device.getNodeId()), "NODE ID".length()) + "   "
+                + rightPad(device.device.getDeviceType(), lengthOfLongestDeviceType) + "   " + device.controllerName);
         }
     }
 

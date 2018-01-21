@@ -20,46 +20,21 @@ import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCod
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Defines a Z-Wave configuration.
+ * Defines a value in the Z-Wave network that is being monitored.
  */
-public class ZWaveConfig
+public class ZWaveMonitoringConfig
 {
-    private String name = "";
-    private String serialPort = "";
-    private List<ZWaveMonitoringConfig> monitoringValues = new ArrayList<>();
+    private byte nodeId;
 
-    public String getName()
+    public byte getNodeId()
     {
-        return name;
+        return nodeId;
     }
 
-    public void setName(String name)
+    public void setNodeId(byte nodeId)
     {
-        this.name = name;
-    }
-
-    public String getSerialPort()
-    {
-        return serialPort;
-    }
-
-    public void setSerialPort(String serialPort)
-    {
-        this.serialPort = serialPort;
-    }
-
-    public List<ZWaveMonitoringConfig> getMonitoringValues()
-    {
-        return monitoringValues;
-    }
-
-    public void setMonitoringValues(List<ZWaveMonitoringConfig> monitoringValues)
-    {
-        this.monitoringValues = monitoringValues;
+        this.nodeId = nodeId;
     }
 
     @Override

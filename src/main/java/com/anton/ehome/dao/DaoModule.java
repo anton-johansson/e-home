@@ -38,6 +38,7 @@ public class DaoModule extends AbstractModule
     protected void configure()
     {
         bindDao(IConfigDao.class, ConfigDao.class);
+        bindDao(IMetricsDao.class, MetricsDao.class);
         bindDao(IUserDao.class, UserDao.class);
     }
 

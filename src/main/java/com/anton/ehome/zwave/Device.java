@@ -15,6 +15,8 @@
  */
 package com.anton.ehome.zwave;
 
+import com.whizzosoftware.wzwave.node.ZWaveNode;
+
 /**
  * Defines a single Z-Wave device.
  */
@@ -22,11 +24,13 @@ public class Device
 {
     private final byte nodeId;
     private final String deviceType;
+    private final ZWaveNode node;
 
-    public Device(byte nodeId, String deviceType)
+    public Device(byte nodeId, String deviceType, ZWaveNode node)
     {
         this.nodeId = nodeId;
         this.deviceType = deviceType;
+        this.node = node;
     }
 
     public byte getNodeId()
@@ -37,5 +41,10 @@ public class Device
     public String getDeviceType()
     {
         return deviceType;
+    }
+
+    public ZWaveNode getNode()
+    {
+        return node;
     }
 }

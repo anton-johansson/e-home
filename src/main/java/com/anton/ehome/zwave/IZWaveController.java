@@ -50,4 +50,11 @@ public interface IZWaveController
      * @param listener The listener to add.
      */
     void onDeviceAdded(Consumer<Device> listener);
+
+    /**
+     * Starts to monitor the values of the device with the given identifier.
+     *
+     * @param nodeId The identifier of the device.
+     */
+    void startMonitor(byte nodeId);
 }
