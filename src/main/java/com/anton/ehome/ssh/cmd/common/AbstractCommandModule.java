@@ -119,6 +119,10 @@ public abstract class AbstractCommandModule extends AbstractModule
         {
             return input -> input;
         }
+        else if (byte.class.equals(type))
+        {
+            return Byte::valueOf;
+        }
         else
         {
             throw new RuntimeException("Unknown type (" + type + ") for option field: " + field);

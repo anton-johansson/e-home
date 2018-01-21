@@ -32,6 +32,7 @@ public class ZWaveCommandModule extends AbstractCommandModule
     {
         return asList(
                 AddControllerCommand.class,
+                AddMonitoredValueCommand.class,
                 RemoveControllerCommand.class,
                 ShowDevicesCommand.class,
                 ShowControllersCommand.class);

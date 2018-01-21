@@ -189,6 +189,41 @@ abstract class AbstractDao
         }
 
         /**
+         * Adds a {@link Number}-value field.
+         *
+         * @param field The name of the field.
+         * @param value The value of the field.
+         * @return Returns the builder.
+         */
+        protected InsertMeasurementBuilder field(String field, Number value)
+        {
+            return field(field, value, false);
+        }
+
+        /**
+         * Adds a {@link Number}-value field.
+         *
+         * @param field The name of the field.
+         * @param value The value of the field.
+         * @param indexed Whether or not this field should be indexed.
+         * @return Returns the builder.
+         */
+        protected InsertMeasurementBuilder field(String field, Number value, boolean indexed)
+        {
+            if (!fields.add(field))
+            {
+                throw new IllegalArgumentException("The field '" + field + "' is already added");
+            }
+
+            if (indexed)
+            {
+                builder.tag(field, String.valueOf(value));
+            }
+            builder.addField(field, value);
+            return this;
+        }
+
+        /**
          * Adds a {@link String}-value field, using a function that accepts the time of insertion.
          *
          * @param field The name of the field.

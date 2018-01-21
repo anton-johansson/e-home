@@ -63,7 +63,7 @@ public class ShowDevicesCommandTest extends Assert
         List<Device> devices = new ArrayList<>();
         for (byte i = 1; i <= numberOfDevices; i++)
         {
-            Device device = new Device(i, "deviceType" + i);
+            Device device = new Device(i, "deviceType" + i, null);
             devices.add(device);
         }
 

@@ -20,18 +20,25 @@ import static java.util.Collections.unmodifiableList;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.dao.IMetricsDao;
 import com.whizzosoftware.wzwave.commandclass.ManufacturerSpecificCommandClass;
+import com.whizzosoftware.wzwave.commandclass.MeterCommandClass;
+import com.whizzosoftware.wzwave.commandclass.MeterCommandClass.MeterReadingValue;
+import com.whizzosoftware.wzwave.commandclass.MeterCommandClass.Scale;
 import com.whizzosoftware.wzwave.controller.ZWaveController;
 import com.whizzosoftware.wzwave.controller.ZWaveControllerListener;
 import com.whizzosoftware.wzwave.controller.netty.NettyZWaveController;
 import com.whizzosoftware.wzwave.node.NodeInfo;
 import com.whizzosoftware.wzwave.node.ZWaveEndpoint;
+import com.whizzosoftware.wzwave.node.ZWaveNode;
 import com.whizzosoftware.wzwave.node.specific.PCController;
 
 /**
@@ -43,12 +50,15 @@ class Controller implements IZWaveController
 
     private final List<Device> devices = new ArrayList<>();
     private final List<Consumer<Device>> deviceAddedListeners = new ArrayList<>();
+    private final Set<Byte> monitoredDevices = new HashSet<>();
+    private final IMetricsDao metricsDao;
     private final String name;
     private final String serialPort;
     private ZWaveController controller;
 
-    Controller(String name, String serialPort)
+    Controller(IMetricsDao metricsDao, String name, String serialPort)
     {
+        this.metricsDao = metricsDao;
         this.name = requireNonBlank(name, "name can't be blank");
         this.serialPort = requireNonBlank(serialPort, "serialPort can't be blank");
     }
@@ -75,6 +85,12 @@ class Controller implements IZWaveController
     public void onDeviceAdded(Consumer<Device> listener)
     {
         deviceAddedListeners.add(listener);
+    }
+
+    @Override
+    public void startMonitor(byte nodeId)
+    {
+        monitoredDevices.add(nodeId);
     }
 
     /**
@@ -113,7 +129,7 @@ class Controller implements IZWaveController
         {
             LOG.trace("#onZWaveNodeAdded: {}", node);
 
-            Device device = new Device(node.getNodeId(), getDeviceType(node));
+            Device device = new Device(node.getNodeId(), getDeviceType(node), (ZWaveNode) node);
             devices.add(device);
             deviceAddedListeners.forEach(listener -> listener.accept(device));
         }
@@ -136,6 +152,14 @@ class Controller implements IZWaveController
         public void onZWaveNodeUpdated(ZWaveEndpoint node)
         {
             LOG.trace("#onZWaveNodeUpdated: {}", node);
+
+            if (monitoredDevices.contains(node.getNodeId()))
+            {
+                MeterCommandClass meterCommandClass = (MeterCommandClass) node.getCommandClass(MeterCommandClass.ID);
+                MeterReadingValue reading = meterCommandClass.getLastValue(Scale.Watts);
+                double value = reading.getCurrentValue();
+                metricsDao.save(node.getNodeId(), value);
+            }
         }
 
         @Override
