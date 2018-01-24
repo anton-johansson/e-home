@@ -20,7 +20,6 @@ import static java.util.Collections.unmodifiableList;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -50,17 +49,18 @@ class Controller implements IZWaveController
 
     private final List<Device> devices = new ArrayList<>();
     private final List<Consumer<Device>> deviceAddedListeners = new ArrayList<>();
-    private final Set<Byte> monitoredDevices = new HashSet<>();
     private final IMetricsDao metricsDao;
     private final String name;
     private final String serialPort;
+    private final Set<Byte> monitoredDevices;
     private ZWaveController controller;
 
-    Controller(IMetricsDao metricsDao, String name, String serialPort)
+    Controller(IMetricsDao metricsDao, String name, String serialPort, Set<Byte> monitoredDevices)
     {
         this.metricsDao = metricsDao;
         this.name = requireNonBlank(name, "name can't be blank");
         this.serialPort = requireNonBlank(serialPort, "serialPort can't be blank");
+        this.monitoredDevices = monitoredDevices;
     }
 
     @Override

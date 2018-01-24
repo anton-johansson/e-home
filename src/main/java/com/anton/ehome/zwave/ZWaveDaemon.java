@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -33,6 +34,7 @@ import com.anton.ehome.common.IDaemon;
 import com.anton.ehome.conf.Config;
 import com.anton.ehome.conf.IConfigService;
 import com.anton.ehome.conf.ZWaveConfig;
+import com.anton.ehome.conf.ZWaveMonitoringConfig;
 import com.anton.ehome.dao.IMetricsDao;
 import com.google.inject.Inject;
 
@@ -64,7 +66,12 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
             String serialPort = zwave.getSerialPort();
             addSerialPortToRXTX(serialPort);
 
-            Controller controller = new Controller(metricsDao, name, serialPort);
+            Set<Byte> monitoredDevices = zwave.getMonitoringValues()
+                    .stream()
+                    .map(ZWaveMonitoringConfig::getNodeId)
+                    .collect(toSet());
+
+            Controller controller = new Controller(metricsDao, name, serialPort, monitoredDevices);
             controller.start();
             controllers.add(controller);
         }
@@ -108,7 +115,7 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
     {
         addSerialPortToRXTX(serialPort);
 
-        Controller controller = new Controller(metricsDao, name, serialPort);
+        Controller controller = new Controller(metricsDao, name, serialPort, new HashSet<>());
         controller.start();
         controllers.add(controller);
 
