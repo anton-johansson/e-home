@@ -80,17 +80,17 @@ public class ShowDevicesCommandTest extends Assert
 
         InOrder inOrder = inOrder(communicator);
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("DEVICE        CONTROLLER");
+        inOrder.verify(communicator).write("NODE ID   DEVICE        CONTROLLER");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType1   default");
+        inOrder.verify(communicator).write("1         deviceType1   default");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType2   default");
+        inOrder.verify(communicator).write("2         deviceType2   default");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType1   test");
+        inOrder.verify(communicator).write("1         deviceType1   test");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType2   test");
+        inOrder.verify(communicator).write("2         deviceType2   test");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType3   test");
+        inOrder.verify(communicator).write("3         deviceType3   test");
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -102,13 +102,13 @@ public class ShowDevicesCommandTest extends Assert
 
         InOrder inOrder = inOrder(communicator);
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("DEVICE        CONTROLLER");
+        inOrder.verify(communicator).write("NODE ID   DEVICE        CONTROLLER");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType1   test");
+        inOrder.verify(communicator).write("1         deviceType1   test");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType2   test");
+        inOrder.verify(communicator).write("2         deviceType2   test");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("deviceType3   test");
+        inOrder.verify(communicator).write("3         deviceType3   test");
         inOrder.verifyNoMoreInteractions();
     }
 }

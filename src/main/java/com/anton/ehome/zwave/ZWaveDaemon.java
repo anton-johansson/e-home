@@ -105,7 +105,7 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
     }
 
     @Override
-    public List<? extends IZWaveController> getControllers()
+    public List<IZWaveController> getControllers()
     {
         return unmodifiableList(controllers);
     }

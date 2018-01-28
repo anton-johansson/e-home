@@ -32,6 +32,7 @@ import com.anton.ehome.ssh.cmd.annotation.Option;
 import com.anton.ehome.ssh.cmd.common.ICommand;
 import com.anton.ehome.ssh.cmd.common.ICommunicator;
 import com.anton.ehome.ssh.cmd.execption.CommandExecutionException;
+import com.anton.ehome.utils.VisibleForTesting;
 import com.anton.ehome.zwave.Device;
 import com.anton.ehome.zwave.IZWaveController;
 import com.anton.ehome.zwave.IZWaveManager;
@@ -61,6 +62,18 @@ class AddMonitoredValueCommand implements ICommand
     {
         this.manager = manager;
         this.configService = configService;
+    }
+
+    @VisibleForTesting
+    void setControllerName(String controllerName)
+    {
+        this.controllerName = controllerName;
+    }
+
+    @VisibleForTesting
+    void setNodeId(byte nodeId)
+    {
+        this.nodeId = nodeId;
     }
 
     @Override
@@ -93,6 +106,7 @@ class AddMonitoredValueCommand implements ICommand
         });
 
         controller.startMonitor(nodeId);
+        communicator.write("Started monitoring device");
     }
 
     private IZWaveController getController() throws CommandExecutionException
