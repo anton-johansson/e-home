@@ -59,6 +59,6 @@ class ConfigService implements IConfigService, Provider<Config>
     @Override
     public Config get()
     {
-        return config;
+        return getCurrentConfig();
     }
 }
