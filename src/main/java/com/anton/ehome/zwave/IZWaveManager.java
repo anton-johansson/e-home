@@ -27,7 +27,7 @@ public interface IZWaveManager
      *
      * @return Returns the controllers.
      */
-    List<? extends IZWaveController> getControllers();
+    List<IZWaveController> getControllers();
 
     /**
      * Adds a controller to the list of {@link IZWaveController controllers}.
