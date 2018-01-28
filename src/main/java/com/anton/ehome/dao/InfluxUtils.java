@@ -40,6 +40,6 @@ final class InfluxUtils
      */
     static void createRetentionPolicies(InfluxDB influx)
     {
-        influx.createRetentionPolicy(RETENTION_POLICY_ONE_HOUR, DATABASE_NAME, "60m", 1, true);
+        influx.createRetentionPolicy(RETENTION_POLICY_ONE_HOUR, DATABASE_NAME, "60m", 1, false);
     }
 }
