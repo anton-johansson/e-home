@@ -25,4 +25,18 @@ public class JsonUtils
 {
     /** The standard JSON mapper. No pretty printing. */
     public static final Gson JSON_MAPPER = new GsonBuilder().create();
+    private static final Gson PRETTY = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+
+    /**
+     * Writes the given object as prettified JSON.
+     *
+     * @param object The object to write.
+     * @return Returns the prettified JSON.
+     */
+    public static String writePretty(Object object)
+    {
+        return PRETTY.toJson(object);
+    }
 }
