@@ -19,6 +19,8 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.anton.ehome.dao.IConfigDao;
+import com.anton.ehome.domain.ConfigHistory;
 
 /**
  * Unit tests of {@link ConfigService}.
@@ -69,5 +72,18 @@ public class ConfigServiceTest extends Assert
         config.setZwaveConfigs(asList(zWaveConfig));
 
         verify(dao).persist("some reason", "some-user", config);
+    }
+
+    @Test
+    public void testGettingHistory()
+    {
+        ConfigHistory history = new ConfigHistory();
+        history.setIdentifier("identifier1");
+
+        when(dao.getHistory()).thenReturn(asList(history));
+
+        List<ConfigHistory> expected = asList(history);
+        List<ConfigHistory> actual = service.getHistory();
+        assertEquals(expected, actual);
     }
 }

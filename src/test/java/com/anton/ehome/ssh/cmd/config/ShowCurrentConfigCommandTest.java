@@ -69,7 +69,7 @@ public class ShowCurrentConfigCommandTest extends Assert
     @Test
     public void testShowingCurrentCommand() throws IOException, CommandExecutionException
     {
-        command.execute("anton", communicator);
+        command.execute(null, communicator);
 
         InOrder inOrder = inOrder(configService, communicator);
         inOrder.verify(configService).getCurrentConfig();

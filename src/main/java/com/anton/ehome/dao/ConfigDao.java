@@ -16,9 +16,14 @@
 package com.anton.ehome.dao;
 
 import static com.anton.ehome.utils.JsonUtils.JSON_MAPPER;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.codec.digest.DigestUtils.sha1Hex;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.influxdb.InfluxDB;
@@ -27,6 +32,7 @@ import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
 import com.anton.ehome.conf.Config;
+import com.anton.ehome.domain.ConfigHistory;
 import com.google.inject.Inject;
 
 /**
@@ -35,6 +41,7 @@ import com.google.inject.Inject;
 class ConfigDao extends AbstractDao implements IConfigDao
 {
     private static final String CURRENT_CONFIG_QUERY = "SELECT sha, data FROM config ORDER BY DESC LIMIT 1";
+    private static final String HISTORY_QUERY = "SELECT sha, data, \"user\", reason FROM config ORDER BY DESC";
 
     @Inject
     ConfigDao(InfluxDB influx)
@@ -60,6 +67,23 @@ class ConfigDao extends AbstractDao implements IConfigDao
                 .field("user", user, true)
                 .field("data", data)
                 .execute();
+    }
+
+    @Override
+    public List<ConfigHistory> getHistory()
+    {
+        return selectMany(HISTORY_QUERY, ConfigData.class)
+                .stream()
+                .map(data ->
+                {
+                    ConfigHistory history = new ConfigHistory();
+                    history.setIdentifier(data.sha);
+                    history.setCreatedAt(ZonedDateTime.ofInstant(data.time, ZoneOffset.UTC));
+                    history.setUser(trimToEmpty(data.user));
+                    history.setReason(trimToEmpty(data.reason));
+                    return history;
+                })
+                .collect(toList());
     }
 
     private ConfigData getOrCreateCurrentConfig()
@@ -100,5 +124,7 @@ class ConfigDao extends AbstractDao implements IConfigDao
         private @Column(name = "time") Instant time;
         private @Column(name = "sha") String sha;
         private @Column(name = "data") String data;
+        private @Column(name = "user") String user;
+        private @Column(name = "reason") String reason;
     }
 }

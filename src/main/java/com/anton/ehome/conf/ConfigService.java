@@ -18,9 +18,11 @@ package com.anton.ehome.conf;
 import static com.anton.ehome.utils.Assert.requireNonBlank;
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.anton.ehome.dao.IConfigDao;
+import com.anton.ehome.domain.ConfigHistory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -60,5 +62,11 @@ class ConfigService implements IConfigService, Provider<Config>
     public Config get()
     {
         return getCurrentConfig();
+    }
+
+    @Override
+    public List<ConfigHistory> getHistory()
+    {
+        return dao.getHistory();
     }
 }

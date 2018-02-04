@@ -15,7 +15,10 @@
  */
 package com.anton.ehome.dao;
 
+import java.util.List;
+
 import com.anton.ehome.conf.Config;
+import com.anton.ehome.domain.ConfigHistory;
 
 /**
  * Provides persistence operations for managing the configuration.
@@ -37,4 +40,9 @@ public interface IConfigDao
      * @param config The changed configuration.
      */
     void persist(String reason, String user, Config config);
+
+    /**
+     * Gets history.
+     */
+    List<ConfigHistory> getHistory();
 }

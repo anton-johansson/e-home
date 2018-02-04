@@ -15,7 +15,10 @@
  */
 package com.anton.ehome.conf;
 
+import java.util.List;
 import java.util.function.Consumer;
+
+import com.anton.ehome.domain.ConfigHistory;
 
 /**
  * Provides utility for managing the configuration.
@@ -37,4 +40,9 @@ public interface IConfigService
      * @return Returns the current configuration.
      */
     Config getCurrentConfig();
+
+    /**
+     * Gets history.
+     */
+    List<ConfigHistory> getHistory();
 }

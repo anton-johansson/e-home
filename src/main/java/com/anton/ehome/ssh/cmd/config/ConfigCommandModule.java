@@ -30,6 +30,8 @@ public class ConfigCommandModule extends AbstractCommandModule
     @Override
     protected List<Class<? extends ICommand>> getCommandClasses()
     {
-        return asList(ShowCurrentConfigCommand.class);
+        return asList(
+                ConfigHistoryCommand.class,
+                ShowCurrentConfigCommand.class);
     }
 }
