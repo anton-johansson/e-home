@@ -51,10 +51,15 @@ class HelpCommand implements ICommand
         Collections.sort(commandKeys);
         int lengthOfLongestCommandKey = commandKeys.stream().max(Comparator.comparing(String::length)).orElse("").length();
 
+        communicator
+                .newLine()
+                .write(rightPad("NAME", lengthOfLongestCommandKey))
+                .write("   ")
+                .write("DESCRIPTION");
+
         for (String commandKey : commandKeys)
         {
             CommandMetaData metaData = commands.get(commandKey);
-
             communicator
                     .newLine()
                     .write(rightPad(commandKey, lengthOfLongestCommandKey))
