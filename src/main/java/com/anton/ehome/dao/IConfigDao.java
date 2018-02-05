@@ -16,6 +16,7 @@
 package com.anton.ehome.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.anton.ehome.conf.Config;
 import com.anton.ehome.domain.ConfigHistory;
@@ -45,4 +46,12 @@ public interface IConfigDao
      * Gets history.
      */
     List<ConfigHistory> getHistory();
+
+    /**
+     * Gets a configuration by its identifier.
+     *
+     * @param identifier The identifier of the configuration.
+     * @return Returns the configuration, if it is found.
+     */
+    Optional<Config> getConfigById(String identifier);
 }

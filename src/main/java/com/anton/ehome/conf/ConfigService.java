@@ -19,6 +19,7 @@ import static com.anton.ehome.utils.Assert.requireNonBlank;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.anton.ehome.dao.IConfigDao;
@@ -68,5 +69,11 @@ class ConfigService implements IConfigService, Provider<Config>
     public List<ConfigHistory> getHistory()
     {
         return dao.getHistory();
+    }
+
+    @Override
+    public Optional<Config> getConfigById(String identifier)
+    {
+        return dao.getConfigById(identifier);
     }
 }

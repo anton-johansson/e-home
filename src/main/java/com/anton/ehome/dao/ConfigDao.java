@@ -86,6 +86,12 @@ class ConfigDao extends AbstractDao implements IConfigDao
                 .collect(toList());
     }
 
+    @Override
+    public Optional<Config> getConfigById(String identifier)
+    {
+        return Optional.empty();
+    }
+
     private ConfigData getOrCreateCurrentConfig()
     {
         Optional<ConfigData> result = selectOne(CURRENT_CONFIG_QUERY, ConfigData.class);

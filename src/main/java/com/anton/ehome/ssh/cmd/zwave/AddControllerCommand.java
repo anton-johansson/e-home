@@ -42,7 +42,7 @@ class AddControllerCommand implements ICommand
     @Option(name = "name", description = "The name of the controller", defaultValue = "default")
     private String name;
 
-    @Argument(description = "The serial port to use")
+    @Argument(name = "serial-port", description = "The serial port to use")
     private String serialPort;
 
     @Inject

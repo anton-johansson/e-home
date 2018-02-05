@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.dao.IUserDao;
+import com.anton.ehome.ssh.cmd.common.CommandArgumentMetaData;
 import com.anton.ehome.ssh.cmd.common.CommandMetaData;
 import com.anton.ehome.ssh.cmd.common.CommandOptionMetaData;
 import com.anton.ehome.ssh.cmd.common.ICommand;
@@ -325,13 +326,14 @@ class EHomeShell implements Command
 
     private void parseOptionsAndArguments(StringTokenizer tokenizer, ICommand command, CommandMetaData metaData) throws UnknownOptionException, CommandExecutionException
     {
+        List<CommandArgumentMetaData> arguments = new ArrayList<>(metaData.getArguments());
         Set<Field> usedFields = new HashSet<>();
 
-        boolean hasWrittenArgument = false;
+        boolean hasProcessedOptions = false;
         while (tokenizer.hasMoreTokens())
         {
             String token = tokenizer.nextToken();
-            if (token.startsWith("--"))
+            if (!hasProcessedOptions && token.startsWith("--"))
             {
                 String optionName = token.substring(2);
                 CommandOptionMetaData optionMetaData = metaData.getOptions()
@@ -343,20 +345,23 @@ class EHomeShell implements Command
                 usedFields.add(optionMetaData.getField());
                 processOption(tokenizer, command, token, optionMetaData);
             }
-            else if (metaData.getArgumentField() != null)
+            else
             {
-                if (hasWrittenArgument)
+                hasProcessedOptions = true;
+                if (arguments.isEmpty())
                 {
                     throw new CommandExecutionException("Unknown argument: " + token);
                 }
-                Object value = metaData.getArgumentConverter().apply(token);
-                writeField(metaData.getArgumentField(), command, value);
-                hasWrittenArgument = true;
+
+                CommandArgumentMetaData argument = arguments.remove(0);
+                Object value = argument.getArgumentConverter().apply(token);
+                writeField(argument.getField(), command, value);
             }
-            else
-            {
-                throw new UnsupportedOperationException("Arguments are not yet implemented");
-            }
+        }
+
+        if (!arguments.isEmpty())
+        {
+            throw new CommandExecutionException("Missing argument: " + arguments.get(0).getArgument().name());
         }
 
         for (CommandOptionMetaData commandMeta : metaData.getOptions())

@@ -54,7 +54,7 @@ class AddMonitoredValueCommand implements ICommand
     @Option(name = "controller", description = "The name of the controller that the node belongs to (not required if there is only one controller)", defaultValue = "")
     private String controllerName;
 
-    @Argument(description = "The identifier of the node within the given controller")
+    @Argument(name = "node", description = "The identifier of the node within the given controller")
     private byte nodeId;
 
     @Inject

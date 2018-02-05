@@ -37,7 +37,7 @@ class RemoveControllerCommand implements ICommand
     private final IZWaveManager manager;
     private final IConfigService configService;
 
-    @Argument(description = "The name of the controller to remove")
+    @Argument(name = "name", description = "The name of the controller to remove")
     private String name;
 
     @VisibleForTesting

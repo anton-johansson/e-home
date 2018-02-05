@@ -29,6 +29,11 @@ import java.lang.annotation.Target;
 public @interface Argument
 {
     /**
+     * The name of the argument.
+     */
+    String name();
+
+    /**
      * The description of the argument.
      */
     String description();

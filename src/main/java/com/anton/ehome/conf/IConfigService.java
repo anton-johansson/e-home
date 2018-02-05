@@ -16,6 +16,7 @@
 package com.anton.ehome.conf;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.anton.ehome.domain.ConfigHistory;
@@ -45,4 +46,12 @@ public interface IConfigService
      * Gets history.
      */
     List<ConfigHistory> getHistory();
+
+    /**
+     * Gets a configuration by its identifier.
+     *
+     * @param identifier The identifier of the configuration.
+     * @return Returns the configuration, if it is found.
+     */
+    Optional<Config> getConfigById(String identifier);
 }

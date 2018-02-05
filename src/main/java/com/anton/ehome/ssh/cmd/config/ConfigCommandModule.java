@@ -32,6 +32,7 @@ public class ConfigCommandModule extends AbstractCommandModule
     {
         return asList(
                 ConfigHistoryCommand.class,
+                DiffConfigsCommand.class,
                 ShowCurrentConfigCommand.class);
     }
 }

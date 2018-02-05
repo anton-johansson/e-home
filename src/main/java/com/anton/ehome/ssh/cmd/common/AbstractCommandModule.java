@@ -62,31 +62,13 @@ public abstract class AbstractCommandModule extends AbstractModule
                 .map(field -> getMetaDataForOption(field))
                 .collect(toList());
 
-        Field argumentField = getArgumentField(commandClass);
-        Function<String, Object> argumentConverter = argumentField == null ? null : getConverter(argumentField);
-
-        CommandMetaData metaData = new CommandMetaData(command, constructor, options, argumentField, argumentConverter);
-        newMapBinder(binder(), String.class, CommandMetaData.class).addBinding(metaData.getCommandKey()).toInstance(metaData);
-    }
-
-    private Field getArgumentField(Class<?> commandClass)
-    {
-        List<Field> arguments = Stream.of(commandClass.getDeclaredFields())
+        List<CommandArgumentMetaData> arguments = Stream.of(commandClass.getDeclaredFields())
                 .filter(field -> field.getAnnotation(Argument.class) != null)
+                .map(field -> getMetaDataForArgument(field))
                 .collect(toList());
 
-        if (arguments.isEmpty())
-        {
-            return null;
-        }
-        else if (arguments.size() > 1)
-        {
-            throw new RuntimeException("Commands can only have one argument");
-        }
-        else
-        {
-            return arguments.get(0);
-        }
+        CommandMetaData metaData = new CommandMetaData(command, constructor, options, arguments);
+        newMapBinder(binder(), String.class, CommandMetaData.class).addBinding(metaData.getCommandKey()).toInstance(metaData);
     }
 
     private CommandOptionMetaData getMetaDataForOption(Field field)
@@ -96,6 +78,13 @@ public abstract class AbstractCommandModule extends AbstractModule
         Function<String, Object> converter = getConverter(field);
         Option option = field.getAnnotation(Option.class);
         return new CommandOptionMetaData(option, field, multiple, converter);
+    }
+
+    private CommandArgumentMetaData getMetaDataForArgument(Field field)
+    {
+        Argument argument = field.getAnnotation(Argument.class);
+        Function<String, Object> converter = getConverter(field);
+        return new CommandArgumentMetaData(argument, field, converter);
     }
 
     private boolean isMultiple(Class<?> type)
