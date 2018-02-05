@@ -254,6 +254,10 @@ class EHomeShell implements Command
 
     private void addCommandToHistory(String command)
     {
+        if (isBlank(currentInput.toString()))
+        {
+            return;
+        }
         if (!commandHistory.isEmpty() && command.equals(commandHistory.get(0)))
         {
             return;
