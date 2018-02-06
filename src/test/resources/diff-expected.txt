@@ -1,0 +1,14 @@
+ {
++  "theFirstProperty": "someValue",
+   "random": null,
+   "someProperty": [
+     {
+-      "oldInt": 54321,
+-      "oldString": "old"
++      "newInt": 12345,
++      "newString": "new"
+     }
+   ],
+   "anotherProperty": 123,
+-  "theLastProperty": 66.6
+ }

@@ -15,7 +15,12 @@
  */
 package com.anton.ehome.ssh.cmd.config;
 
+import static com.anton.ehome.utils.DiffUtils.getDifference;
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 import com.anton.ehome.conf.Config;
 import com.anton.ehome.conf.IConfigService;
@@ -24,6 +29,8 @@ import com.anton.ehome.ssh.cmd.annotation.Command;
 import com.anton.ehome.ssh.cmd.common.ICommand;
 import com.anton.ehome.ssh.cmd.common.ICommunicator;
 import com.anton.ehome.ssh.cmd.execption.CommandExecutionException;
+import com.anton.ehome.utils.JsonUtils;
+import com.anton.ehome.utils.VisibleForTesting;
 import com.google.inject.Inject;
 
 /**
@@ -41,17 +48,81 @@ class DiffConfigsCommand implements ICommand
     }
 
     @Argument(name = "first", description = "The identifier of the first configuration")
-    private String first;
+    private String first = "";
 
     @Argument(name = "second", description = "The identifier of the second configuration")
-    private String second;
+    private String second = "";
+
+    @VisibleForTesting
+    void setFirst(String first)
+    {
+        this.first = first;
+    }
+
+    @VisibleForTesting
+    void setSecond(String second)
+    {
+        this.second = second;
+    }
 
     @Override
     public void execute(String user, ICommunicator communicator) throws IOException, CommandExecutionException
     {
+        if (first.equals(second))
+        {
+            throw new CommandExecutionException("You can't check the same configuration");
+        }
+
         Config config1 = configService.getConfigById(first).orElseThrow(() -> new CommandExecutionException("Cannot find configuration with identifier '" + first + "'"));
         Config config2 = configService.getConfigById(second).orElseThrow(() -> new CommandExecutionException("Cannot find configuration with identifier '" + second + "'"));
 
-        communicator.newLine().write("No difference");
+        String output1 = JsonUtils.writePretty(config1);
+        String output2 = JsonUtils.writePretty(config2);
+
+        Optional<String> optionalDiff = getDifference(output1, output2);
+        if (optionalDiff.isPresent())
+        {
+            communicator.newLine();
+            String diff = optionalDiff.get();
+            List<String> lines = asList(diff.split("\\r?\\n"));
+            for (String line : lines)
+            {
+                String prefix = getPrefix(line);
+                String suffix = getSuffix(line);
+                communicator.newLine().write(prefix + line + suffix);
+            }
+        }
+        else
+        {
+            communicator.newLine().write("The configurations are identical");
+        }
+    }
+
+    private String getPrefix(String line)
+    {
+        if (line.startsWith("+"))
+        {
+            return "\u001B[32m";
+        }
+        else if (line.startsWith("-"))
+        {
+            return "\u001B[31m";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private String getSuffix(String line)
+    {
+        if (line.startsWith("+") || line.startsWith("-"))
+        {
+            return "\u001B[0m";
+        }
+        else
+        {
+            return "";
+        }
     }
 }

@@ -33,6 +33,7 @@ import org.influxdb.annotation.Measurement;
 
 import com.anton.ehome.conf.Config;
 import com.anton.ehome.domain.ConfigHistory;
+import com.anton.ehome.utils.JsonUtils;
 import com.google.inject.Inject;
 
 /**
@@ -40,8 +41,9 @@ import com.google.inject.Inject;
  */
 class ConfigDao extends AbstractDao implements IConfigDao
 {
-    private static final String CURRENT_CONFIG_QUERY = "SELECT sha, data FROM config ORDER BY DESC LIMIT 1";
+    private static final String CURRENT_QUERY = "SELECT sha, data FROM config ORDER BY DESC LIMIT 1";
     private static final String HISTORY_QUERY = "SELECT sha, data, \"user\", reason FROM config ORDER BY DESC";
+    private static final String BY_ID_QUERY = "SELECT data FROM config WHERE sha = '[sha]'";
 
     @Inject
     ConfigDao(InfluxDB influx)
@@ -89,12 +91,12 @@ class ConfigDao extends AbstractDao implements IConfigDao
     @Override
     public Optional<Config> getConfigById(String identifier)
     {
-        return Optional.empty();
+        return selectOne(BY_ID_QUERY.replace("[sha]", identifier), ConfigData.class).map(data -> JsonUtils.read(data.data, Config.class));
     }
 
     private ConfigData getOrCreateCurrentConfig()
     {
-        Optional<ConfigData> result = selectOne(CURRENT_CONFIG_QUERY, ConfigData.class);
+        Optional<ConfigData> result = selectOne(CURRENT_QUERY, ConfigData.class);
         if (result.isPresent())
         {
             return result.get();
@@ -102,7 +104,7 @@ class ConfigDao extends AbstractDao implements IConfigDao
         else
         {
             createDefaultConfig();
-            return selectOne(CURRENT_CONFIG_QUERY, ConfigData.class).orElseThrow(() -> new InfluxDBException("Could not create or find default configuration"));
+            return selectOne(CURRENT_QUERY, ConfigData.class).orElseThrow(() -> new InfluxDBException("Could not create or find default configuration"));
         }
     }
 

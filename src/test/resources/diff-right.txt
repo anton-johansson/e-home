@@ -1,0 +1,11 @@
+{
+  "theFirstProperty": "someValue",
+  "random": null,
+  "someProperty": [
+    {
+      "newInt": 12345,
+      "newString": "new"
+    }
+  ],
+  "anotherProperty": 123,
+}

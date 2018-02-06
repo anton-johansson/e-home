@@ -39,4 +39,16 @@ public class JsonUtils
     {
         return PRETTY.toJson(object);
     }
+
+    /**
+     * Reads JSON into an object.
+     *
+     * @param json The JSON to read.
+     * @param clazz The class of the object to read it into.
+     * @return Returns the object.
+     */
+    public static <T> T read(String json, Class<T> clazz)
+    {
+        return JSON_MAPPER.fromJson(json, clazz);
+    }
 }

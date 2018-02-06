@@ -1,0 +1,11 @@
+{
+  "random": null,
+  "someProperty": [
+    {
+      "oldInt": 54321,
+      "oldString": "old"
+    }
+  ],
+  "anotherProperty": 123,
+  "theLastProperty": 66.6
+}
