@@ -93,6 +93,12 @@ class Controller implements IZWaveController
         monitoredDevices.add(nodeId);
     }
 
+    @Override
+    public boolean stopMonitor(byte nodeId)
+    {
+        return monitoredDevices.remove(nodeId);
+    }
+
     /**
      * Starts the controller.
      */

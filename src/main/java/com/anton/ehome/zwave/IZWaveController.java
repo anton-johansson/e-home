@@ -57,4 +57,12 @@ public interface IZWaveController
      * @param nodeId The identifier of the device.
      */
     void startMonitor(byte nodeId);
+
+    /**
+     * Stops monitoring the values of the device with the given identifier.
+     *
+     * @param nodeId The identifier of the device.
+     * @return Returns {@code true} if the device was successfully removed from the list of monitored devices.
+     */
+    boolean stopMonitor(byte nodeId);
 }

@@ -41,15 +41,13 @@ import com.anton.ehome.ssh.cmd.execption.CommandExecutionException;
 import com.anton.ehome.zwave.Device;
 import com.anton.ehome.zwave.IZWaveController;
 import com.anton.ehome.zwave.IZWaveManager;
-import com.whizzosoftware.wzwave.commandclass.MeterCommandClass;
-import com.whizzosoftware.wzwave.node.ZWaveNode;
 
 /**
- * Unit tests of {@link AddMonitoredValueCommand}.
+ * Unit tests of {@link RemoveMonitoredValueCommand}.
  */
-public class AddMonitoredValueCommandTest extends Assert
+public class RemoveMonitoredValueCommandTest extends Assert
 {
-    private AddMonitoredValueCommand command;
+    private RemoveMonitoredValueCommand command;
     private @Mock IZWaveManager manager;
     private @Mock IConfigService configService;
     private @Mock ICommunicator communicator;
@@ -59,7 +57,7 @@ public class AddMonitoredValueCommandTest extends Assert
     public void setUp() throws IOException
     {
         MockitoAnnotations.initMocks(this);
-        command = new AddMonitoredValueCommand(manager, configService);
+        command = new RemoveMonitoredValueCommand(manager, configService);
         when(communicator.newLine()).thenReturn(communicator);
         when(communicator.write(anyString())).thenReturn(communicator);
 
@@ -70,17 +68,16 @@ public class AddMonitoredValueCommandTest extends Assert
 
     private IZWaveController controller(int id)
     {
-        ZWaveNode node1 = mock(ZWaveNode.class);
-        ZWaveNode node2 = mock(ZWaveNode.class);
-
-        when(node2.hasCommandClass(MeterCommandClass.ID)).thenReturn(true);
-
-        Device device1 = new Device((byte) 1, "deviceType1", node1);
-        Device device2 = new Device((byte) 2, "deviceType2", node2);
+        Device device1 = new Device((byte) 1, "deviceType1", null);
+        Device device2 = new Device((byte) 2, "deviceType2", null);
 
         IZWaveController controller = mock(IZWaveController.class);
         when(controller.getName()).thenReturn("controller" + id);
         when(controller.getDevices()).thenReturn(asList(device1, device2));
+        if (id == 1)
+        {
+            when(controller.stopMonitor((byte) 2)).thenReturn(true);
+        }
         return controller;
     }
 
@@ -147,7 +144,7 @@ public class AddMonitoredValueCommandTest extends Assert
     }
 
     @Test
-    public void testSpecifyingDeviceThatCannotBeMonitored() throws IOException
+    public void testWithDeviceThatIsNotMonitored() throws IOException
     {
         command.setControllerName("controller1");
         command.setNodeId((byte) 1);
@@ -159,12 +156,12 @@ public class AddMonitoredValueCommandTest extends Assert
         }
         catch (CommandExecutionException e)
         {
-            assertEquals("The given node cannot report monitoring values", e.getMessage());
+            assertEquals("Device is not monitored", e.getMessage());
         }
     }
 
     @Test
-    public void testSuccessfullyMonitoringDevice() throws IOException, CommandExecutionException
+    public void testSuccessfullyStopMonitoringDevice() throws IOException, CommandExecutionException
     {
         command.setControllerName("controller1");
         command.setNodeId((byte) 2);
@@ -174,14 +171,15 @@ public class AddMonitoredValueCommandTest extends Assert
         inOrder.verify(manager).getControllers();
         inOrder.verify(controller1, new Times(2)).getName();
         inOrder.verify(controller1).getDevices();
-        inOrder.verify(configService).modify(eq("Started monitoring device"), eq("anton"), any());
-        inOrder.verify(controller1).startMonitor((byte) 2);
-        inOrder.verify(communicator).write("Started monitoring device");
+        inOrder.verify(configService).modify(eq("Stopped monitoring device"), eq("anton"), any());
+        inOrder.verify(controller1).stopMonitor((byte) 2);
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("Stopped monitoring device");
         inOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    public void testSuccessfullyMonitoringDeviceWithoutSpecifyingController() throws IOException, CommandExecutionException
+    public void testSuccessfullyStopMonitoringDeviceWithoutSpecifyingController() throws IOException, CommandExecutionException
     {
         when(manager.getControllers()).thenReturn(asList(controller1));
 
@@ -192,9 +190,10 @@ public class AddMonitoredValueCommandTest extends Assert
         inOrder.verify(manager).getControllers();
         inOrder.verify(controller1).getName();
         inOrder.verify(controller1).getDevices();
-        inOrder.verify(configService).modify(eq("Started monitoring device"), eq("anton"), any());
-        inOrder.verify(controller1).startMonitor((byte) 2);
-        inOrder.verify(communicator).write("Started monitoring device");
+        inOrder.verify(configService).modify(eq("Stopped monitoring device"), eq("anton"), any());
+        inOrder.verify(controller1).stopMonitor((byte) 2);
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("Stopped monitoring device");
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -211,9 +210,10 @@ public class AddMonitoredValueCommandTest extends Assert
         inOrder.verify(manager).getControllers();
         inOrder.verify(controller1, new Times(2)).getName();
         inOrder.verify(controller1).getDevices();
-        inOrder.verify(configService).modify(eq("Started monitoring device"), eq("anton"), any());
-        inOrder.verify(controller1).startMonitor((byte) 2);
-        inOrder.verify(communicator).write("Started monitoring device");
+        inOrder.verify(configService).modify(eq("Stopped monitoring device"), eq("anton"), any());
+        inOrder.verify(controller1).stopMonitor((byte) 2);
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("Stopped monitoring device");
         inOrder.verifyNoMoreInteractions();
     }
 }

@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.conf.IConfigService;
 import com.anton.ehome.conf.ZWaveConfig;
-import com.anton.ehome.conf.ZWaveMonitoringConfig;
 import com.anton.ehome.ssh.cmd.annotation.Argument;
 import com.anton.ehome.ssh.cmd.annotation.Command;
 import com.anton.ehome.ssh.cmd.annotation.Option;
@@ -37,16 +36,14 @@ import com.anton.ehome.zwave.Device;
 import com.anton.ehome.zwave.IZWaveController;
 import com.anton.ehome.zwave.IZWaveManager;
 import com.google.inject.Inject;
-import com.whizzosoftware.wzwave.commandclass.MeterCommandClass;
-import com.whizzosoftware.wzwave.node.ZWaveNode;
 
 /**
- * A command for initiating a monitored value in the Z-Wave network.
+ * A command that stops monitoring a value.
  */
-@Command(group = "z-wave", name = "add-monitored-value", description = "Starts monitoring a value in the Z-Wave network")
-class AddMonitoredValueCommand implements ICommand
+@Command(group = "z-wave", name = "remove-monitored-value", description = "Stops monitoring a value in the Z-Wave network")
+public class RemoveMonitoredValueCommand implements ICommand
 {
-    private static final Logger LOG = LoggerFactory.getLogger(AddMonitoredValueCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RemoveMonitoredValueCommand.class);
 
     private final IZWaveManager manager;
     private final IConfigService configService;
@@ -56,13 +53,6 @@ class AddMonitoredValueCommand implements ICommand
 
     @Argument(name = "node", description = "The identifier of the node within the given controller")
     private byte nodeId;
-
-    @Inject
-    AddMonitoredValueCommand(IZWaveManager manager, IConfigService configService)
-    {
-        this.manager = manager;
-        this.configService = configService;
-    }
 
     @VisibleForTesting
     void setControllerName(String controllerName)
@@ -76,6 +66,13 @@ class AddMonitoredValueCommand implements ICommand
         this.nodeId = nodeId;
     }
 
+    @Inject
+    RemoveMonitoredValueCommand(IZWaveManager manager, IConfigService configService)
+    {
+        this.manager = manager;
+        this.configService = configService;
+    }
+
     @Override
     public void execute(String user, ICommunicator communicator) throws IOException, CommandExecutionException
     {
@@ -85,13 +82,7 @@ class AddMonitoredValueCommand implements ICommand
         Device device = getDevice(controller);
         LOG.debug("Using device: {}", device.getDeviceType());
 
-        ZWaveNode node = device.getNode();
-        if (!node.hasCommandClass(MeterCommandClass.ID))
-        {
-            throw new CommandExecutionException("The given node cannot report monitoring values");
-        }
-
-        configService.modify("Started monitoring device", user, config ->
+        configService.modify("Stopped monitoring device", user, config ->
         {
             ZWaveConfig zWaveConfig = config.getZwaveConfigs()
                     .stream()
@@ -99,14 +90,17 @@ class AddMonitoredValueCommand implements ICommand
                     .findAny()
                     .get();
 
-            ZWaveMonitoringConfig monitoringValue = new ZWaveMonitoringConfig();
-            monitoringValue.setNodeId(nodeId);
-
-            zWaveConfig.getMonitoringValues().add(monitoringValue);
+            zWaveConfig.getMonitoringValues().removeIf(value -> value.getNodeId() == device.getNodeId());
         });
 
-        controller.startMonitor(nodeId);
-        communicator.newLine().write("Started monitoring device");
+        if (controller.stopMonitor(device.getNodeId()))
+        {
+            communicator.newLine().write("Stopped monitoring device");
+        }
+        else
+        {
+            throw new CommandExecutionException("Device is not monitored");
+        }
     }
 
     private IZWaveController getController() throws CommandExecutionException
