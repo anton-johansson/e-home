@@ -123,6 +123,8 @@ public class DiffConfigsCommandTest extends Assert
         inOrder.verify(communicator, new Times(2)).newLine();
         inOrder.verify(communicator).write(" {");
         inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("   \"httpPort\": 8080,");
+        inOrder.verify(communicator).newLine();
         inOrder.verify(communicator).write("   \"zwaveConfigs\": [");
         inOrder.verify(communicator).newLine();
         inOrder.verify(communicator).write("     {");
@@ -137,7 +139,9 @@ public class DiffConfigsCommandTest extends Assert
         inOrder.verify(communicator).newLine();
         inOrder.verify(communicator).write("     }");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("   ]");
+        inOrder.verify(communicator).write("   ],");
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("   \"charts\": []");
         inOrder.verify(communicator).newLine();
         inOrder.verify(communicator).write(" }");
         inOrder.verifyNoMoreInteractions();

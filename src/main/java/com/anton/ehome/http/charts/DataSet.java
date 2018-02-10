@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.conf;
+package com.anton.ehome.http.charts;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
@@ -23,45 +23,45 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 import java.util.List;
 
+import com.anton.ehome.domain.Metric;
+
 /**
- * Holds configuration for the application.
+ * Defines a data set.
  */
-public class Config
+public class DataSet
 {
-    private static final int DEFAULT_HTTP_PORT = 8080;
+    private String label = "";
+    private String color = "";
+    private List<Metric> dataPoints = emptyList();
 
-    private int httpPort = DEFAULT_HTTP_PORT;
-    private List<ZWaveConfig> zwaveConfigs = emptyList();
-    private List<Chart> charts = emptyList();
-
-    public int getHttpPort()
+    public String getLabel()
     {
-        return httpPort;
+        return label;
     }
 
-    public void setHttpPort(int httpPort)
+    public void setLabel(String label)
     {
-        this.httpPort = httpPort;
+        this.label = label;
     }
 
-    public List<ZWaveConfig> getZwaveConfigs()
+    public String getColor()
     {
-        return zwaveConfigs;
+        return color;
     }
 
-    public void setZwaveConfigs(List<ZWaveConfig> zwaveConfigs)
+    public void setColor(String color)
     {
-        this.zwaveConfigs = zwaveConfigs;
+        this.color = color;
     }
 
-    public List<Chart> getCharts()
+    public List<Metric> getDataPoints()
     {
-        return charts;
+        return dataPoints;
     }
 
-    public void setCharts(List<Chart> charts)
+    public void setDataPoints(List<Metric> dataPoints)
     {
-        this.charts = charts;
+        this.dataPoints = dataPoints;
     }
 
     @Override

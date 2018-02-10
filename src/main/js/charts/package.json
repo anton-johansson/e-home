@@ -1,0 +1,29 @@
+{
+  "name": "e-home-charts",
+  "private": true,
+  "version": "0.0.1-SNAPSHOT",
+  "description": "Provides HTML and JavaScript to render the E-Home charts",
+  "main": "index.js",
+  "homepage": "./",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build && rm -rf ../../../../target/charts && mkdir ../../../../target/charts && mv build ../../../../target/charts/html-charts",
+    "test": "react-scripts test --envjsdom",
+    "eject": "react-scripts eject"
+  },
+  "author": {
+    "name": "Anton Johansson",
+    "email": "antoon.johansson@gmail.com",
+    "url": "http://anton-johansson.com"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "chart.js": "2.7.1",
+    "prop-types": "15.6.0",
+    "react": "16.2.0",
+    "react-chartjs-2": "2.7.0",
+    "react-dom": "16.2.0",
+    "react-scripts": "1.1.1",
+    "react-timeout": "1.0.1"
+  }
+}

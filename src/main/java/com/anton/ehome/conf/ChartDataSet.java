@@ -15,53 +15,48 @@
  */
 package com.anton.ehome.conf;
 
-import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
-import java.util.List;
-
 /**
- * Holds configuration for the application.
+ * A single data set within a chart.
  */
-public class Config
+public class ChartDataSet
 {
-    private static final int DEFAULT_HTTP_PORT = 8080;
+    private int deviceId;
+    private String label = "";
+    private String color = "";
 
-    private int httpPort = DEFAULT_HTTP_PORT;
-    private List<ZWaveConfig> zwaveConfigs = emptyList();
-    private List<Chart> charts = emptyList();
-
-    public int getHttpPort()
+    public int getDeviceId()
     {
-        return httpPort;
+        return deviceId;
     }
 
-    public void setHttpPort(int httpPort)
+    public void setDeviceId(int deviceId)
     {
-        this.httpPort = httpPort;
+        this.deviceId = deviceId;
     }
 
-    public List<ZWaveConfig> getZwaveConfigs()
+    public String getLabel()
     {
-        return zwaveConfigs;
+        return label;
     }
 
-    public void setZwaveConfigs(List<ZWaveConfig> zwaveConfigs)
+    public void setLabel(String label)
     {
-        this.zwaveConfigs = zwaveConfigs;
+        this.label = label;
     }
 
-    public List<Chart> getCharts()
+    public String getColor()
     {
-        return charts;
+        return color;
     }
 
-    public void setCharts(List<Chart> charts)
+    public void setColor(String color)
     {
-        this.charts = charts;
+        this.color = color;
     }
 
     @Override

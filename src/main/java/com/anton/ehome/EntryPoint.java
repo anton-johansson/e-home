@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.anton.ehome.conf.ConfigModule;
 import com.anton.ehome.dao.DaoModule;
+import com.anton.ehome.http.HttpModule;
 import com.anton.ehome.ssh.SshModule;
 import com.anton.ehome.zwave.ZWaveModule;
 import com.google.inject.Guice;
@@ -49,15 +50,15 @@ public class EntryPoint
         Injector injector = Guice.createInjector(modules);
 
         Daemon daemon = injector.getInstance(Daemon.class);
-        daemon.start();
-
-        LOG.info("Press [Enter] to stop the daemons");
-        try (Scanner scanner = new Scanner(System.in))
+        if (daemon.start())
         {
-            scanner.nextLine();
+            LOG.info("Press [Enter] to stop the daemons");
+            try (Scanner scanner = new Scanner(System.in))
+            {
+                scanner.nextLine();
+            }
+            daemon.stop();
         }
-        daemon.stop();
-
         LOG.info("Exiting...");
     }
 
@@ -66,6 +67,7 @@ public class EntryPoint
         return asList(
                 new ConfigModule(),
                 new DaoModule(),
+                new HttpModule(),
                 new SshModule(),
                 new ZWaveModule());
     }

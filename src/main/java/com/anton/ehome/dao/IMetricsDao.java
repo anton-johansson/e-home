@@ -15,6 +15,11 @@
  */
 package com.anton.ehome.dao;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.anton.ehome.domain.Metric;
+
 /**
  * Provides persistence operations for managing metrics.
  */
@@ -27,4 +32,14 @@ public interface IMetricsDao
      * @param value The value of the metric.
      */
     void save(byte nodeId, double value);
+
+    /**
+     * Gets metrics for the device between the given times.
+     *
+     * @param nodeId The device.
+     * @param from Get metrics from this date.
+     * @param to Get metrics to this date.
+     * @return Returns all found metrics.
+     */
+    List<Metric> getMetrics(byte nodeId, LocalDateTime from, LocalDateTime to);
 }
