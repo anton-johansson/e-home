@@ -13,55 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.conf;
+package com.anton.ehome.domain;
 
-import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
-import java.util.List;
+import java.time.Instant;
+
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
 
 /**
- * Holds configuration for the application.
+ * Defines a single metric.
  */
-public class Config
+@Measurement(name = "metric")
+public class Metric
 {
-    private static final int DEFAULT_HTTP_PORT = 8080;
+    private @Column(name = "time") Instant time;
+    private @Column(name = "value") double value;
 
-    private int httpPort = DEFAULT_HTTP_PORT;
-    private List<ZWaveConfig> zwaveConfigs = emptyList();
-    private List<Chart> charts = emptyList();
-
-    public int getHttpPort()
+    public Instant getTime()
     {
-        return httpPort;
+        return time;
     }
 
-    public void setHttpPort(int httpPort)
+    public void setTime(Instant time)
     {
-        this.httpPort = httpPort;
+        this.time = time;
     }
 
-    public List<ZWaveConfig> getZwaveConfigs()
+    public double getValue()
     {
-        return zwaveConfigs;
+        return value;
     }
 
-    public void setZwaveConfigs(List<ZWaveConfig> zwaveConfigs)
+    public void setValue(double value)
     {
-        this.zwaveConfigs = zwaveConfigs;
-    }
-
-    public List<Chart> getCharts()
-    {
-        return charts;
-    }
-
-    public void setCharts(List<Chart> charts)
-    {
-        this.charts = charts;
+        this.value = value;
     }
 
     @Override

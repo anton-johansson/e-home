@@ -15,8 +15,21 @@
  */
 package com.anton.ehome.utils;
 
+import static java.time.ZoneOffset.UTC;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * Provides various utilities for handling JSON-formatting.
@@ -24,10 +37,32 @@ import com.google.gson.GsonBuilder;
 public class JsonUtils
 {
     /** The standard JSON mapper. No pretty printing. */
-    public static final Gson JSON_MAPPER = new GsonBuilder().create();
+    public static final Gson JSON_MAPPER = new GsonBuilder()
+            .registerTypeAdapter(Instant.class, new InstantSerializer())
+            .create();
+
     private static final Gson PRETTY = new GsonBuilder()
+            .registerTypeAdapter(Instant.class, new InstantSerializer())
             .setPrettyPrinting()
             .create();
+
+    /**
+     * Writes the given object as minified JSON to the given stream.
+     *
+     * @param object The object to write.
+     * @param stream The output stream.
+     */
+    public static void write(Object object, OutputStream stream)
+    {
+        try (OutputStreamWriter out = new OutputStreamWriter(stream, "UTF-8"); JsonWriter writer = new JsonWriter(out))
+        {
+            JSON_MAPPER.toJson(object, object.getClass(), writer);
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Writes the given object as prettified JSON.
@@ -50,5 +85,18 @@ public class JsonUtils
     public static <T> T read(String json, Class<T> clazz)
     {
         return JSON_MAPPER.fromJson(json, clazz);
+    }
+
+    /**
+     * Serializes {@link Instant instants} as ISO 8601 formatted strings.
+     */
+    private static class InstantSerializer implements JsonSerializer<Instant>
+    {
+        @Override
+        public JsonElement serialize(Instant source, Type type, JsonSerializationContext context)
+        {
+            ZonedDateTime time = source.atZone(UTC);
+            return new JsonPrimitive(time.toString());
+        }
     }
 }

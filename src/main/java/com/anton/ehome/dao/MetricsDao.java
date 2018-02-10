@@ -15,10 +15,16 @@
  */
 package com.anton.ehome.dao;
 
+import static java.time.ZoneOffset.UTC;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.influxdb.InfluxDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.domain.Metric;
 import com.google.inject.Inject;
 
 /**
@@ -27,6 +33,7 @@ import com.google.inject.Inject;
 class MetricsDao extends AbstractDao implements IMetricsDao
 {
     private static final Logger LOG = LoggerFactory.getLogger(MetricsDao.class);
+    private static final String METRICS_QUERY = "SELECT time, value FROM metric WHERE nodeId = [nodeId] AND time >= '[from]' AND time <= '[to]'";
 
     @Inject
     MetricsDao(InfluxDB influx)
@@ -42,5 +49,16 @@ class MetricsDao extends AbstractDao implements IMetricsDao
                 .field("nodeId", nodeId, true)
                 .field("value", value)
                 .execute();
+    }
+
+    @Override
+    public List<Metric> getMetrics(byte nodeId, LocalDateTime from, LocalDateTime to)
+    {
+        String query = METRICS_QUERY
+                .replace("[nodeId]", String.valueOf(nodeId))
+                .replace("[from]", from.atZone(UTC).toString())
+                .replace("[to]", to.atZone(UTC).toString());
+
+        return selectMany(query, Metric.class);
     }
 }

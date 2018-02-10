@@ -24,44 +24,53 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 import java.util.List;
 
 /**
- * Holds configuration for the application.
+ * Defines a chart.
  */
-public class Config
+public class Chart
 {
-    private static final int DEFAULT_HTTP_PORT = 8080;
+    private String name = "";
+    private String title = "";
+    private String yAxisLabel = "";
+    private List<ChartDataSet> dataSets = emptyList();
 
-    private int httpPort = DEFAULT_HTTP_PORT;
-    private List<ZWaveConfig> zwaveConfigs = emptyList();
-    private List<Chart> charts = emptyList();
-
-    public int getHttpPort()
+    public String getName()
     {
-        return httpPort;
+        return name;
     }
 
-    public void setHttpPort(int httpPort)
+    public void setName(String name)
     {
-        this.httpPort = httpPort;
+        this.name = name;
     }
 
-    public List<ZWaveConfig> getZwaveConfigs()
+    public String getTitle()
     {
-        return zwaveConfigs;
+        return title;
     }
 
-    public void setZwaveConfigs(List<ZWaveConfig> zwaveConfigs)
+    public void setTitle(String title)
     {
-        this.zwaveConfigs = zwaveConfigs;
+        this.title = title;
     }
 
-    public List<Chart> getCharts()
+    public String getYAxisLabel()
     {
-        return charts;
+        return yAxisLabel;
     }
 
-    public void setCharts(List<Chart> charts)
+    public void setYAxisLabel(String yAxisLabel)
     {
-        this.charts = charts;
+        this.yAxisLabel = yAxisLabel;
+    }
+
+    public List<ChartDataSet> getDataSets()
+    {
+        return dataSets;
+    }
+
+    public void setDataSets(List<ChartDataSet> dataSets)
+    {
+        this.dataSets = dataSets;
     }
 
     @Override

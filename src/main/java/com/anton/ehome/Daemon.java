@@ -42,7 +42,7 @@ class Daemon
     /**
      * Starts the daemons.
      */
-    void start()
+    boolean start()
     {
         Set<IDaemon> startedDaemons = new HashSet<>();
 
@@ -58,10 +58,11 @@ class Daemon
             {
                 LOG.warn("Could not start daemon: {}", daemon.getClass().getName());
                 startedDaemons.forEach(IDaemon::stop);
-                return;
+                return false;
             }
         }
         LOG.info("All daemons started");
+        return true;
     }
 
     /**
