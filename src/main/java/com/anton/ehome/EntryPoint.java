@@ -23,6 +23,8 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.anton.ehome.common.CommonModule;
+import com.anton.ehome.common.Uptime;
 import com.anton.ehome.conf.ConfigModule;
 import com.anton.ehome.dao.DaoModule;
 import com.anton.ehome.http.HttpModule;
@@ -49,6 +51,9 @@ public class EntryPoint
         modules.forEach(module -> LOG.debug("Using module: {}", module.getClass().getName()));
         Injector injector = Guice.createInjector(modules);
 
+        Uptime uptime = injector.getInstance(Uptime.class);
+        uptime.markStart();
+
         Daemon daemon = injector.getInstance(Daemon.class);
         if (daemon.start())
         {
@@ -65,6 +70,7 @@ public class EntryPoint
     private static List<Module> getModules()
     {
         return asList(
+                new CommonModule(),
                 new ConfigModule(),
                 new DaoModule(),
                 new HttpModule(),

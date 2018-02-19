@@ -45,6 +45,7 @@ public class CommandModule extends AbstractCommandModule
         return asList(
                 DisconnectCommand.class,
                 HelpCommand.class,
+                UptimeCommand.class,
                 VersionCommand.class);
     }
 }
