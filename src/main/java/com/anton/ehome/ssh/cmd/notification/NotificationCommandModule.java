@@ -13,41 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.anton.ehome.ssh.cmd;
+package com.anton.ehome.ssh.cmd.notification;
 
 import static java.util.Arrays.asList;
 
 import java.util.List;
 
-import com.anton.ehome.ssh.cmd.charts.ChartsCommandModule;
 import com.anton.ehome.ssh.cmd.common.AbstractCommandModule;
 import com.anton.ehome.ssh.cmd.common.ICommand;
-import com.anton.ehome.ssh.cmd.config.ConfigCommandModule;
-import com.anton.ehome.ssh.cmd.notification.NotificationCommandModule;
-import com.anton.ehome.ssh.cmd.zwave.ZWaveCommandModule;
 
 /**
- * Contains IOC bindings for the common SSH commands.
+ * Contains IOC bindings for the notification command module.
  */
-public class CommandModule extends AbstractCommandModule
+public class NotificationCommandModule extends AbstractCommandModule
 {
-    @Override
-    protected void configure()
-    {
-        super.configure();
-        install(new ChartsCommandModule());
-        install(new ConfigCommandModule());
-        install(new NotificationCommandModule());
-        install(new ZWaveCommandModule());
-    }
-
     @Override
     protected List<Class<? extends ICommand>> getCommandClasses()
     {
         return asList(
-                DisconnectCommand.class,
-                HelpCommand.class,
-                UptimeCommand.class,
-                VersionCommand.class);
+                ConfigureNotificationsCommand.class,
+                SendNotificationCommand.class);
     }
 }

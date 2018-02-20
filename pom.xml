@@ -85,6 +85,7 @@
         <!-- Test dependency versions -->
         <junit.version>4.12</junit.version>
         <mockito.version>2.13.0</mockito.version>
+        <mockserver-netty.version>3.6.2</mockserver-netty.version>
 
         <!-- Tool versions -->
         <nodejs.version>9.5.0</nodejs.version>
@@ -219,6 +220,18 @@
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>${mockserver-netty.version}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

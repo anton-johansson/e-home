@@ -15,64 +15,50 @@
  */
 package com.anton.ehome.conf;
 
-import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
-import java.util.List;
+import com.anton.ehome.notification.NotificationProvider;
 
 /**
- * Holds configuration for the application.
+ * Contains configuration for sending notifications.
  */
-public class Config
+public class NotificationConfig
 {
-    private static final int DEFAULT_HTTP_PORT = 8080;
+    private NotificationProvider provider;
+    private String token1 = "";
+    private String token2 = "";
 
-    private int httpPort = DEFAULT_HTTP_PORT;
-    private List<ZWaveConfig> zwaveConfigs = emptyList();
-    private List<Chart> charts = emptyList();
-    private NotificationConfig notificationConfig = new NotificationConfig();
-
-    public int getHttpPort()
+    public NotificationProvider getProvider()
     {
-        return httpPort;
+        return provider;
     }
 
-    public void setHttpPort(int httpPort)
+    public void setProvider(NotificationProvider provider)
     {
-        this.httpPort = httpPort;
+        this.provider = provider;
     }
 
-    public List<ZWaveConfig> getZwaveConfigs()
+    public String getToken1()
     {
-        return zwaveConfigs;
+        return token1;
     }
 
-    public void setZwaveConfigs(List<ZWaveConfig> zwaveConfigs)
+    public void setToken1(String token1)
     {
-        this.zwaveConfigs = zwaveConfigs;
+        this.token1 = token1;
     }
 
-    public List<Chart> getCharts()
+    public String getToken2()
     {
-        return charts;
+        return token2;
     }
 
-    public void setCharts(List<Chart> charts)
+    public void setToken2(String token2)
     {
-        this.charts = charts;
-    }
-
-    public NotificationConfig getNotificationConfig()
-    {
-        return notificationConfig;
-    }
-
-    public void setNotificationConfig(NotificationConfig notificationConfig)
-    {
-        this.notificationConfig = notificationConfig;
+        this.token2 = token2;
     }
 
     @Override
