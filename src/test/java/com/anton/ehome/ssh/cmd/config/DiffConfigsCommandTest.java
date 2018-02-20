@@ -141,7 +141,15 @@ public class DiffConfigsCommandTest extends Assert
         inOrder.verify(communicator).newLine();
         inOrder.verify(communicator).write("   ],");
         inOrder.verify(communicator).newLine();
-        inOrder.verify(communicator).write("   \"charts\": []");
+        inOrder.verify(communicator).write("   \"charts\": [],");
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("   \"notificationConfig\": {");
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("     \"token1\": \"\",");
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("     \"token2\": \"\"");
+        inOrder.verify(communicator).newLine();
+        inOrder.verify(communicator).write("   }");
         inOrder.verify(communicator).newLine();
         inOrder.verify(communicator).write(" }");
         inOrder.verifyNoMoreInteractions();
