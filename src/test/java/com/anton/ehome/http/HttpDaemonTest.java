@@ -87,7 +87,7 @@ public class HttpDaemonTest extends AbstractTest
     @Test
     public void testNotFound() throws Exception
     {
-        HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:8080/unknown").openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:1337/unknown").openConnection();
         int responseCode = connection.getResponseCode();
 
         assertEquals(404, responseCode);

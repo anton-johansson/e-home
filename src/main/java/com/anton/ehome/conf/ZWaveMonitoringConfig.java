@@ -25,7 +25,11 @@ import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
  */
 public class ZWaveMonitoringConfig
 {
+    private static final int DEFAULT_INTERVAL = 10;
+
     private byte nodeId;
+    private Scale scale;
+    private int interval = DEFAULT_INTERVAL;
 
     public byte getNodeId()
     {
@@ -35,6 +39,26 @@ public class ZWaveMonitoringConfig
     public void setNodeId(byte nodeId)
     {
         this.nodeId = nodeId;
+    }
+
+    public Scale getScale()
+    {
+        return scale;
+    }
+
+    public void setScale(Scale scale)
+    {
+        this.scale = scale;
+    }
+
+    public int getInterval()
+    {
+        return interval;
+    }
+
+    public void setInterval(int interval)
+    {
+        this.interval = interval;
     }
 
     @Override

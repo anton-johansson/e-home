@@ -28,6 +28,7 @@ import com.anton.ehome.common.Uptime;
 import com.anton.ehome.conf.ConfigModule;
 import com.anton.ehome.dao.DaoModule;
 import com.anton.ehome.http.HttpModule;
+import com.anton.ehome.metrics.MetricsModule;
 import com.anton.ehome.notification.NotificationModule;
 import com.anton.ehome.ssh.SshModule;
 import com.anton.ehome.zwave.ZWaveModule;
@@ -75,6 +76,7 @@ public class EntryPoint
                 new ConfigModule(),
                 new DaoModule(),
                 new HttpModule(),
+                new MetricsModule(),
                 new NotificationModule(),
                 new SshModule(),
                 new ZWaveModule());

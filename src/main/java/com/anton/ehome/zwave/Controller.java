@@ -27,11 +27,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.anton.ehome.dao.IMetricsDao;
 import com.whizzosoftware.wzwave.commandclass.ManufacturerSpecificCommandClass;
-import com.whizzosoftware.wzwave.commandclass.MeterCommandClass;
-import com.whizzosoftware.wzwave.commandclass.MeterCommandClass.MeterReadingValue;
-import com.whizzosoftware.wzwave.commandclass.MeterCommandClass.Scale;
 import com.whizzosoftware.wzwave.controller.ZWaveController;
 import com.whizzosoftware.wzwave.controller.ZWaveControllerListener;
 import com.whizzosoftware.wzwave.controller.netty.NettyZWaveController;
@@ -49,15 +45,13 @@ class Controller implements IZWaveController
 
     private final List<Device> devices = new ArrayList<>();
     private final List<Consumer<Device>> deviceAddedListeners = new ArrayList<>();
-    private final IMetricsDao metricsDao;
     private final String name;
     private final String serialPort;
     private final Set<Byte> monitoredDevices;
     private ZWaveController controller;
 
-    Controller(IMetricsDao metricsDao, String name, String serialPort, Set<Byte> monitoredDevices)
+    Controller(String name, String serialPort, Set<Byte> monitoredDevices)
     {
-        this.metricsDao = metricsDao;
         this.name = requireNonBlank(name, "name can't be blank");
         this.serialPort = requireNonBlank(serialPort, "serialPort can't be blank");
         this.monitoredDevices = monitoredDevices;
@@ -158,17 +152,6 @@ class Controller implements IZWaveController
         public void onZWaveNodeUpdated(ZWaveEndpoint node)
         {
             LOG.trace("#onZWaveNodeUpdated: {}", node);
-
-            if (monitoredDevices.contains(node.getNodeId()))
-            {
-                MeterCommandClass meterCommandClass = (MeterCommandClass) node.getCommandClass(MeterCommandClass.ID);
-                MeterReadingValue reading = meterCommandClass.getLastValue(Scale.Watts);
-                Double value = reading.getCurrentValue();
-                if (value != null)
-                {
-                    metricsDao.save(node.getNodeId(), value);
-                }
-            }
         }
 
         @Override

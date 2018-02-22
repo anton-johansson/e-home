@@ -35,7 +35,6 @@ import com.anton.ehome.conf.Config;
 import com.anton.ehome.conf.IConfigService;
 import com.anton.ehome.conf.ZWaveConfig;
 import com.anton.ehome.conf.ZWaveMonitoringConfig;
-import com.anton.ehome.dao.IMetricsDao;
 import com.google.inject.Inject;
 
 /**
@@ -47,13 +46,11 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
 
     private final List<Controller> controllers = new ArrayList<>();
     private final IConfigService configService;
-    private final IMetricsDao metricsDao;
 
     @Inject
-    ZWaveDaemon(IConfigService configService, IMetricsDao metricsDao)
+    ZWaveDaemon(IConfigService configService)
     {
         this.configService = configService;
-        this.metricsDao = metricsDao;
     }
 
     @Override
@@ -71,7 +68,7 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
                     .map(ZWaveMonitoringConfig::getNodeId)
                     .collect(toSet());
 
-            Controller controller = new Controller(metricsDao, name, serialPort, monitoredDevices);
+            Controller controller = new Controller(name, serialPort, monitoredDevices);
             controller.start();
             controllers.add(controller);
         }
@@ -115,7 +112,7 @@ class ZWaveDaemon implements IDaemon, IZWaveManager
     {
         addSerialPortToRXTX(serialPort);
 
-        Controller controller = new Controller(metricsDao, name, serialPort, new HashSet<>());
+        Controller controller = new Controller(name, serialPort, new HashSet<>());
         controller.start();
         controllers.add(controller);
 
