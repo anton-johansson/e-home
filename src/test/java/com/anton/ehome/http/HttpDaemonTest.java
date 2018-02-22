@@ -67,13 +67,16 @@ public class HttpDaemonTest extends AbstractTest
     @Override
     protected void initMocks()
     {
-        when(configService.getCurrentConfig()).thenReturn(new Config());
+        Config config = new Config();
+        config.setHttpPort(1337);
+
+        when(configService.getCurrentConfig()).thenReturn(config);
     }
 
     @Test
     public void testSuccessfulCall() throws Exception
     {
-        HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:8080/test").openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL("http://localhost:1337/test").openConnection();
         int responseCode = connection.getResponseCode();
         String body = IOUtils.toString(connection.getInputStream(), "UTF-8");
 
