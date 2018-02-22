@@ -91,7 +91,7 @@ class MetricsDaemon implements IDaemon
         {
             while (!isDone)
             {
-                LOG.debug("Running new iteration");
+                LOG.trace("Running new iteration");
                 Config config = configService.getCurrentConfig();
 
                 try
