@@ -163,8 +163,11 @@ class Controller implements IZWaveController
             {
                 MeterCommandClass meterCommandClass = (MeterCommandClass) node.getCommandClass(MeterCommandClass.ID);
                 MeterReadingValue reading = meterCommandClass.getLastValue(Scale.Watts);
-                double value = reading.getCurrentValue();
-                metricsDao.save(node.getNodeId(), value);
+                Double value = reading.getCurrentValue();
+                if (value != null)
+                {
+                    metricsDao.save(node.getNodeId(), value);
+                }
             }
         }
 
